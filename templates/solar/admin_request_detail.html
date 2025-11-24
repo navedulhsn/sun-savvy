@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}Request Details - Admin - SunSavvy{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="padding: 0;">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar d-none d-md-block">
+            <nav>
+                <ul class="sidebar-nav">
+                    <li class="nav-item">
+                        <a href="{% url 'admin_dashboard' %}" class="nav-link">
+                            <i class="bi bi-speedometer2"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin_users' %}" class="nav-link">
+                            <i class="bi bi-people"></i>
+                            <span>Users</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin_providers' %}" class="nav-link">
+                            <i class="bi bi-building"></i>
+                            <span>Service Providers</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin_requests' %}" class="nav-link active">
+                            <i class="bi bi-envelope-check"></i>
+                            <span>Service Requests</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10" style="padding: 2rem; background: var(--light-bg); min-height: calc(100vh - 60px);">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="fw-bold mb-0" style="font-size: 2rem; color: var(--text-primary);">
+                    <i class="bi bi-envelope-check text-info"></i> Request Details
+                </h1>
+                <a href="{% url 'admin_requests' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Requests
+                </a>
+            </div>
+            
+            <!-- Request Info -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Request Information</h5>
+                    <span class="badge bg-light text-dark">
+                        {{ service_request.get_status_display }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Service Type:</th>
+                                    <td class="fw-semibold">{{ service_request.service_type }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Customer:</th>
+                                    <td>
+                                        <a href="{% url 'admin_user_detail' service_request.user.id %}">
+                                            {{ service_request.user.get_full_name|default:service_request.user.username }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Service Provider:</th>
+                                    <td>
+                                        <a href="{% url 'admin_provider_detail' service_request.service_provider.id %}">
+                                            {{ service_request.service_provider.company_name }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Phone:</th>
+                                    <td>{{ service_request.phone }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Status:</th>
+                                    <td>
+                                        <span class="badge bg-{% if service_request.status == 'pending' %}warning{% elif service_request.status == 'completed' %}success{% elif service_request.status == 'in_progress' %}info{% else %}secondary{% endif %}">
+                                            {{ service_request.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Requested Date:</th>
+                                    <td>{{ service_request.requested_date|date:"F d, Y H:i" }}</td>
+                                </tr>
+                                {% if service_request.scheduled_date %}
+                                <tr>
+                                    <th>Scheduled Date:</th>
+                                    <td>{{ service_request.scheduled_date|date:"F d, Y H:i" }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if service_request.quote_amount %}
+                                <tr>
+                                    <th>Quote Amount:</th>
+                                    <td class="fw-semibold text-success">${{ service_request.quote_amount|floatformat:2 }}</td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="mb-3">
+                        <strong>Description:</strong>
+                        <p class="mt-2">{{ service_request.description }}</p>
+                    </div>
+                    <div>
+                        <strong>Address:</strong>
+                        <p class="mt-2">{{ service_request.address }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Update Status -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-pencil-square"></i> Update Status</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'admin_request_update_status' service_request.id %}">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <select class="form-select" name="status" required>
+                                    <option value="pending" {% if service_request.status == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="accepted" {% if service_request.status == 'accepted' %}selected{% endif %}>Accepted</option>
+                                    <option value="in_progress" {% if service_request.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                                    <option value="completed" {% if service_request.status == 'completed' %}selected{% endif %}>Completed</option>
+                                    <option value="cancelled" {% if service_request.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-info w-100">
+                                    <i class="bi bi-check-circle"></i> Update Status
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

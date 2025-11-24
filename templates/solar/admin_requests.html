@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Service Requests - Admin - SunSavvy{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="padding: 0;">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar d-none d-md-block">
+            <nav>
+                <ul class="sidebar-nav">
+                    <li class="nav-item">
+                        <a href="{% url 'admin_dashboard' %}" class="nav-link">
+                            <i class="bi bi-speedometer2"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin_users' %}" class="nav-link">
+                            <i class="bi bi-people"></i>
+                            <span>Users</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin_providers' %}" class="nav-link">
+                            <i class="bi bi-building"></i>
+                            <span>Service Providers</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin_requests' %}" class="nav-link active">
+                            <i class="bi bi-envelope-check"></i>
+                            <span>Service Requests</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10" style="padding: 2rem; background: var(--light-bg); min-height: calc(100vh - 60px);">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="fw-bold mb-0" style="font-size: 2rem; color: var(--text-primary);">
+                    <i class="bi bi-envelope-check text-info"></i> Manage Service Requests
+                </h1>
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+            
+            <!-- Filter -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-10">
+                            <select class="form-select" name="status">
+                                <option value="">All Statuses</option>
+                                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="accepted" {% if status_filter == 'accepted' %}selected{% endif %}>Accepted</option>
+                                <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+                                <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                                <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-info w-100">
+                                <i class="bi bi-funnel"></i> Filter
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Requests Table -->
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-list-ul"></i> All Service Requests ({{ requests.count }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if requests %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Service Provider</th>
+                                        <th>Service Type</th>
+                                        <th>Status</th>
+                                        <th>Requested Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for request in requests %}
+                                        <tr>
+                                            <td class="fw-semibold">{{ request.user.get_full_name|default:request.user.username }}</td>
+                                            <td>{{ request.service_provider.company_name }}</td>
+                                            <td>{{ request.service_type }}</td>
+                                            <td>
+                                                <span class="badge bg-{% if request.status == 'pending' %}warning{% elif request.status == 'completed' %}success{% elif request.status == 'in_progress' %}info{% else %}secondary{% endif %}">
+                                                    {{ request.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td class="text-muted">{{ request.requested_date|date:"M d, Y" }}</td>
+                                            <td>
+                                                <a href="{% url 'admin_request_detail' request.id %}" class="btn btn-sm btn-outline-info">
+                                                    <i class="bi bi-eye"></i> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-4">No service requests found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

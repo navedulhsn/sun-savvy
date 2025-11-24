@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Fault Detection Result - SunSavvy{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-{{ fault_detection.fault_type|lower|yesno:'success,danger' }} text-white">
+                    <h3 class="mb-0">
+                        <i class="bi bi-shield-check"></i> Detection Result
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Uploaded Image</h5>
+                            <img src="{{ fault_detection.image.url }}" alt="Solar Panel" class="img-fluid rounded shadow-sm">
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Detection Details</h5>
+                            <table class="table">
+                                <tr>
+                                    <td><strong>Fault Type:</strong></td>
+                                    <td>
+                                        <span class="badge bg-{{ fault_detection.fault_type|lower|yesno:'success,danger' }}">
+                                            {{ fault_detection.fault_type }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Confidence Score:</strong></td>
+                                    <td>{{ fault_detection.confidence_score }}%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Date:</strong></td>
+                                    <td>{{ fault_detection.created_at|date:"F d, Y H:i" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h5>Analysis</h5>
+                    <div class="alert alert-{{ fault_detection.fault_type|lower|yesno:'success,warning' }}">
+                        <p class="mb-0">{{ fault_detection.description }}</p>
+                    </div>
+                    
+                    {% if fault_detection.detection_result.recommendations %}
+                        <h5>Recommendations</h5>
+                        <div class="alert alert-info">
+                            <p class="mb-0">{{ fault_detection.detection_result.recommendations }}</p>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'fault_detection' %}" class="btn btn-info me-2">
+                            <i class="bi bi-arrow-left"></i> Analyze Another
+                        </a>
+                        <a href="{% url 'service_providers' %}" class="btn btn-success">
+                            <i class="bi bi-people-fill"></i> Find Repair Services
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ provider.company_name }} - SunSavvy{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row g-5">
+        <!-- Provider Info -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3"
+                            style="width: 60px; height: 60px;">
+                            <i class="bi bi-building fs-3"></i>
+                        </div>
+                        <div>
+                            <h2 class="fw-bold mb-0 text-dark h4">{{ provider.company_name }}</h2>
+                            <div class="text-warning small">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <span class="text-muted ms-1">(5.0)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-uppercase text-muted small mb-3">Contact Info</h6>
+                        <p class="mb-2"><i class="bi bi-geo-alt me-2 text-primary"></i>{{ provider.address }}, {{
+                            provider.city }}, {{ provider.state }} {{ provider.zip_code }}</p>
+                        <p class="mb-2"><i class="bi bi-telephone me-2 text-primary"></i>{{ provider.phone }}</p>
+                        <p class="mb-0"><i class="bi bi-envelope me-2 text-primary"></i>{{ provider.email }}</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-uppercase text-muted small mb-3">Services Offered</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for service in provider.services_offered.split %}
+                            <span class="badge bg-light text-dark border px-3 py-2">{{ service }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Request Form -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="fw-bold mb-0 text-primary">Request Service</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label class="form-label">Service Type</label>
+                            {{ form.service_type }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            {{ form.description }}
+                            <div class="form-text">Describe the issue or installation requirements.</div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Your Phone</label>
+                                {{ form.phone }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Address</label>
+                                {{ form.address }}
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-2">Submit Request</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Form styling */
+    input,
+    textarea,
+    select {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+    }
+</style>
+{% endblock %}

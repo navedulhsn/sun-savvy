@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}Provider Details - Admin - SunSavvy{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="padding: 0;">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar d-none d-md-block">
+            <nav>
+                <ul class="sidebar-nav">
+                    <li class="nav-item">
+                        <a href="{% url 'admin_dashboard' %}" class="nav-link">
+                            <i class="bi bi-speedometer2"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin_users' %}" class="nav-link">
+                            <i class="bi bi-people"></i>
+                            <span>Users</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin_providers' %}" class="nav-link active">
+                            <i class="bi bi-building"></i>
+                            <span>Service Providers</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin_requests' %}" class="nav-link">
+                            <i class="bi bi-envelope-check"></i>
+                            <span>Service Requests</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10" style="padding: 2rem; background: var(--light-bg); min-height: calc(100vh - 60px);">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="fw-bold mb-0" style="font-size: 2rem; color: var(--text-primary);">
+                    <i class="bi bi-building text-success"></i> Provider Details
+                </h1>
+                <a href="{% url 'admin_providers' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Providers
+                </a>
+            </div>
+            
+            <!-- Provider Info -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Provider Information</h5>
+                    <div>
+                        {% if not provider.is_verified %}
+                            <form method="post" action="{% url 'admin_provider_approve' provider.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-light btn-sm">
+                                    <i class="bi bi-check-circle"></i> Approve Provider
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Company Name:</th>
+                                    <td class="fw-semibold">{{ provider.company_name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Username:</th>
+                                    <td>{{ provider.user.username }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Email:</th>
+                                    <td>{{ provider.email }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Phone:</th>
+                                    <td>{{ provider.phone }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Services Offered:</th>
+                                    <td>{{ provider.services_offered }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Address:</th>
+                                    <td>{{ provider.address }}</td>
+                                </tr>
+                                <tr>
+                                    <th>City:</th>
+                                    <td>{{ provider.city }}</td>
+                                </tr>
+                                <tr>
+                                    <th>State:</th>
+                                    <td>{{ provider.state }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Zip Code:</th>
+                                    <td>{{ provider.zip_code }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Rating:</th>
+                                    <td>
+                                        {% if provider.rating %}
+                                            <span class="badge bg-warning text-dark">{{ provider.rating }}/5.0</span>
+                                        {% else %}
+                                            <span class="text-muted">No rating yet</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Verification Status:</strong>
+                            {% if provider.is_verified %}
+                                <span class="badge bg-success ms-2">Verified</span>
+                            {% else %}
+                                <span class="badge bg-warning ms-2">Pending Approval</span>
+                            {% endif %}
+                            {% if provider.email_verified %}
+                                <span class="badge bg-success ms-2">Email Verified</span>
+                            {% else %}
+                                <span class="badge bg-danger ms-2">Email Not Verified</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Joined:</strong> <span class="text-muted">{{ provider.created_at|date:"F d, Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Service Requests -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-envelope-check"></i> Service Requests ({{ service_requests.count }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if service_requests %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Service Type</th>
+                                        <th>Status</th>
+                                        <th>Requested Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for request in service_requests %}
+                                        <tr>
+                                            <td class="fw-semibold">{{ request.user.get_full_name|default:request.user.username }}</td>
+                                            <td>{{ request.service_type }}</td>
+                                            <td>
+                                                <span class="badge bg-{% if request.status == 'pending' %}warning{% elif request.status == 'completed' %}success{% else %}secondary{% endif %}">
+                                                    {{ request.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td class="text-muted">{{ request.requested_date|date:"M d, Y" }}</td>
+                                            <td>
+                                                <a href="{% url 'admin_request_detail' request.id %}" class="btn btn-sm btn-outline-primary">
+                                                    View Details
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-3">No service requests yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

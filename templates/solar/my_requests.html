@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}My Requests - SunSavvy{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold text-dark">My Service Requests</h1>
+        <a href="{% url 'service_providers' %}" class="btn btn-primary rounded-pill">
+            <i class="bi bi-plus-lg me-2"></i>New Request
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Provider</th>
+                            <th>Service</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for req in requests %}
+                        <tr>
+                            <td class="ps-4 fw-semibold">{{ req.service_provider.company_name }}</td>
+                            <td>
+                                <span class="badge bg-info bg-opacity-10 text-info rounded-pill">
+                                    {{ req.service_type }}
+                                </span>
+                            </td>
+                            <td>{{ req.requested_date|date:"M d, Y" }}</td>
+                            <td>
+                                {% if req.status == 'Pending' %}
+                                <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill">Pending</span>
+                                {% elif req.status == 'Accepted' %}
+                                <span class="badge bg-success bg-opacity-10 text-success rounded-pill">Accepted</span>
+                                {% elif req.status == 'Completed' %}
+                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill">Completed</span>
+                                {% else %}
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill">{{ req.status
+                                    }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-secondary rounded-pill" data-bs-toggle="modal"
+                                    data-bs-target="#requestModal{{ req.id }}">
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="requestModal{{ req.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Request Details</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p><strong>Provider:</strong> {{ req.service_provider.company_name }}</p>
+                                        <p><strong>Service:</strong> {{ req.service_type }}</p>
+                                        <p><strong>Date:</strong> {{ req.requested_date }}</p>
+                                        <p><strong>Status:</strong> {{ req.status }}</p>
+                                        <p><strong>Description:</strong></p>
+                                        <p class="bg-light p-3 rounded">{{ req.description }}</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <p class="text-muted mb-0">No service requests found.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

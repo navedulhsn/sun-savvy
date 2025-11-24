@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Estimation History - SunSavvy{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold text-dark">Estimation History</h1>
+        <a href="{% url 'solar_estimation' %}" class="btn btn-primary rounded-pill">
+            <i class="bi bi-plus-lg me-2"></i>New Estimation
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Date</th>
+                            <th>Location</th>
+                            <th>System Size</th>
+                            <th>Cost</th>
+                            <th>ROI</th>
+                            <th>Payback</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for est in estimations %}
+                        <tr>
+                            <td class="ps-4">{{ est.created_at|date:"M d, Y" }}</td>
+                            <td>{{ est.address|truncatechars:40 }}</td>
+                            <td>
+                                <span class="badge bg-info bg-opacity-10 text-info rounded-pill">
+                                    {{ est.total_capacity_kw|floatformat:2 }} kW
+                                </span>
+                            </td>
+                            <td>${{ est.total_cost|floatformat:0 }}</td>
+                            <td>
+                                <span class="text-success fw-semibold">{{ est.roi_percentage|floatformat:1 }}%</span>
+                            </td>
+                            <td>{{ est.payback_period_years|floatformat:1 }} years</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="py-4">
+                                    <i class="bi bi-clipboard-data text-muted fs-1 mb-3"></i>
+                                    <p class="text-muted mb-0">No estimation history found.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

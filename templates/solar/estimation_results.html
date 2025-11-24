@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block title %}Estimation Results - SunSavvy{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i> 
+        <strong>Disclaimer:</strong> These results are estimates and may vary. Please consult with a professional for accurate assessments.
+    </div>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header bg-success text-white">
+            <h3 class="mb-0"><i class="bi bi-check-circle"></i> Estimation Results</h3>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5><i class="bi bi-geo-alt"></i> Location</h5>
+                    <p class="mb-1"><strong>Address:</strong> {{ estimation.address }}</p>
+                    <p class="mb-1"><strong>City:</strong> {{ estimation.city }}, {{ estimation.state }}</p>
+                    <p class="mb-0"><strong>Coordinates:</strong> {{ estimation.latitude }}, {{ estimation.longitude }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5><i class="bi bi-sun"></i> Solar Data</h5>
+                    <p class="mb-1"><strong>Solar Irradiance:</strong> {{ estimation.solar_irradiance }} kWh/m²/day</p>
+                    <p class="mb-1"><strong>Rooftop Area:</strong> {{ estimation.rooftop_area }} m²</p>
+                    <p class="mb-0"><strong>Monthly Consumption:</strong> {{ estimation.monthly_consumption_kwh }} kWh</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Key Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow-sm border-primary">
+                <div class="card-body">
+                    <i class="bi bi-grid-3x3-gap text-primary" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2">{{ estimation.panels_needed }}</h3>
+                    <p class="mb-0">Solar Panels</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow-sm border-success">
+                <div class="card-body">
+                    <i class="bi bi-lightning-charge text-success" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2">{{ estimation.panel_capacity_kw }} kW</h3>
+                    <p class="mb-0">System Capacity</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow-sm border-warning">
+                <div class="card-body">
+                    <i class="bi bi-cash-stack text-warning" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2">${{ estimation.estimated_cost|floatformat:0 }}</h3>
+                    <p class="mb-0">Estimated Cost</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow-sm border-info">
+                <div class="card-body">
+                    <i class="bi bi-graph-up text-info" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2">{{ estimation.roi_percentage }}%</h3>
+                    <p class="mb-0">ROI</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Financial Analysis -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-cash-stack"></i> Financial Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr>
+                            <td><strong>Annual Energy Generated:</strong></td>
+                            <td>{{ estimation.annual_energy_generated|floatformat:2 }} kWh</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Annual Savings:</strong></td>
+                            <td class="text-success">${{ estimation.annual_savings|floatformat:2 }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Payback Period:</strong></td>
+                            <td>{{ estimation.payback_period_years|floatformat:1 }} years</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Return on Investment:</strong></td>
+                            <td class="text-success">{{ estimation.roi_percentage|floatformat:1 }}%</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Savings Projection</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="savingsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="text-center mt-4">
+        <a href="{% url 'solar_estimation' %}" class="btn btn-primary me-2">
+            <i class="bi bi-arrow-left"></i> New Estimation
+        </a>
+        <a href="{% url 'service_providers' %}" class="btn btn-success">
+            <i class="bi bi-people-fill"></i> Find Service Providers
+        </a>
+    </div>
+</div>
+
+<script>
+    // Savings projection chart
+    const ctx = document.getElementById('savingsChart').getContext('2d');
+    const years = [];
+    const cumulativeSavings = [];
+    let total = 0;
+    
+    for (let i = 0; i <= 25; i++) {
+        years.push(i);
+        if (i > 0) {
+            total += {{ estimation.annual_savings }};
+        }
+        cumulativeSavings.push(total);
+    }
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: years,
+            datasets: [{
+                label: 'Cumulative Savings ($)',
+                data: cumulativeSavings,
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: '25-Year Savings Projection'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
+

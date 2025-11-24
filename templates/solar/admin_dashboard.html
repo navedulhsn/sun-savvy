@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - SunSavvy{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="padding: 0;">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar d-none d-md-block">
+            <nav>
+                <ul class="sidebar-nav">
+                    <li class="nav-item">
+                        <a href="{% url 'admin_dashboard' %}" class="nav-link active">
+                            <i class="bi bi-speedometer2"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin_users' %}" class="nav-link">
+                            <i class="bi bi-people"></i>
+                            <span>Users</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin_providers' %}" class="nav-link">
+                            <i class="bi bi-building"></i>
+                            <span>Service Providers</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin_requests' %}" class="nav-link">
+                            <i class="bi bi-envelope-check"></i>
+                            <span>Service Requests</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10" style="padding: 2rem; background: var(--light-bg); min-height: calc(100vh - 60px);">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="fw-bold mb-0" style="font-size: 2rem; color: var(--text-primary);">
+                    <i class="bi bi-shield-check text-warning"></i> Admin Dashboard
+                </h1>
+                <div class="d-flex gap-2 align-items-center">
+                    <a href="/admin/" class="btn btn-outline-dark btn-sm" target="_blank" title="Django Admin Panel">
+                        <i class="bi bi-gear"></i> Django Admin
+                    </a>
+                    <span class="badge bg-warning text-dark">
+                        <i class="bi bi-person-badge"></i> {{ user.authorizedperson.designation }}
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Statistics Cards -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-primary">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-1">Total Users</h6>
+                                    <h2 class="fw-bold mb-0 text-primary">{{ total_users }}</h2>
+                                </div>
+                                <div class="bg-primary-light rounded-circle p-3">
+                                    <i class="bi bi-people text-primary" style="font-size: 2rem;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-success">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-1">Service Providers</h6>
+                                    <h2 class="fw-bold mb-0 text-success">{{ total_providers }}</h2>
+                                </div>
+                                <div class="bg-success-light rounded-circle p-3">
+                                    <i class="bi bi-building text-success" style="font-size: 2rem;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-warning">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-1">Pending Providers</h6>
+                                    <h2 class="fw-bold mb-0 text-warning">{{ pending_providers }}</h2>
+                                </div>
+                                <div class="bg-warning-light rounded-circle p-3">
+                                    <i class="bi bi-clock-history text-warning" style="font-size: 2rem;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-info">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-1">Service Requests</h6>
+                                    <h2 class="fw-bold mb-0 text-info">{{ total_requests }}</h2>
+                                    <small class="text-muted">{{ pending_requests }} pending</small>
+                                </div>
+                                <div class="bg-info-light rounded-circle p-3">
+                                    <i class="bi bi-envelope-check text-info" style="font-size: 2rem;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="row g-4">
+                <!-- Recent Users -->
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="bi bi-people"></i> Recent Users</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_users %}
+                                <div class="list-group list-group-flush">
+                                    {% for user_profile in recent_users %}
+                                        <a href="{% url 'admin_user_detail' user_profile.user.id %}" class="list-group-item list-group-item-action">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">{{ user_profile.user.get_full_name|default:user_profile.user.username }}</h6>
+                                                    <small class="text-muted">{{ user_profile.user.email }}</small>
+                                                </div>
+                                                <span class="badge bg-{% if user_profile.email_verified %}success{% else %}warning{% endif %}">
+                                                    {% if user_profile.email_verified %}Verified{% else %}Pending{% endif %}
+                                                </span>
+                                            </div>
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                                <div class="text-center mt-3">
+                                    <a href="{% url 'admin_users' %}" class="btn btn-sm btn-outline-primary">View All Users</a>
+                                </div>
+                            {% else %}
+                                <p class="text-muted text-center py-3">No users yet.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Providers -->
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="bi bi-building"></i> Recent Providers</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_providers %}
+                                <div class="list-group list-group-flush">
+                                    {% for provider in recent_providers %}
+                                        <a href="{% url 'admin_provider_detail' provider.id %}" class="list-group-item list-group-item-action">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">{{ provider.company_name }}</h6>
+                                                    <small class="text-muted">{{ provider.city }}, {{ provider.state }}</small>
+                                                </div>
+                                                <div class="text-end">
+                                                    {% if provider.is_verified %}
+                                                        <span class="badge bg-success">Verified</span>
+                                                    {% else %}
+                                                        <span class="badge bg-warning">Pending</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                                <div class="text-center mt-3">
+                                    <a href="{% url 'admin_providers' %}" class="btn btn-sm btn-outline-success">View All Providers</a>
+                                </div>
+                            {% else %}
+                                <p class="text-muted text-center py-3">No service providers yet.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Requests -->
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="bi bi-envelope-check"></i> Recent Requests</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_requests %}
+                                <div class="list-group list-group-flush">
+                                    {% for request in recent_requests %}
+                                        <a href="{% url 'admin_request_detail' request.id %}" class="list-group-item list-group-item-action">
+                                            <div>
+                                                <h6 class="mb-1">{{ request.service_type }}</h6>
+                                                <small class="text-muted">
+                                                    {{ request.user.username }} → {{ request.service_provider.company_name }}
+                                                </small>
+                                                <div class="mt-1">
+                                                    <span class="badge bg-{% if request.status == 'pending' %}warning{% elif request.status == 'completed' %}success{% else %}secondary{% endif %}">
+                                                        {{ request.get_status_display }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                                <div class="text-center mt-3">
+                                    <a href="{% url 'admin_requests' %}" class="btn btn-sm btn-outline-info">View All Requests</a>
+                                </div>
+                            {% else %}
+                                <p class="text-muted text-center py-3">No service requests yet.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
