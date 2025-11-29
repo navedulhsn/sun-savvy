@@ -340,9 +340,9 @@ solar/
 
 ### Environment Variables (.env)
 ```bash
-HF_TOKEN=REDACTED
-EMAIL_HOST_USER=your-email@gmail.com
-EMAIL_HOST_PASSWORD=your-app-password
+HF_TOKEN=<your_huggingface_token_here>
+EMAIL_HOST_USER=<your_email@gmail.com>
+EMAIL_HOST_PASSWORD=<your_app_password>
 ```
 
 ### Settings (sunsavvy/settings.py)

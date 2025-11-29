@@ -52,8 +52,10 @@ def chatbot(request):
             if not message:
                 return JsonResponse({'error': 'No message provided'}, status=400)
             
-            # Hardcoded API key for now
-            api_key = "REDACTED"
+            # Get API key from environment variables
+            api_key = os.getenv('HF_TOKEN', '')
+            if not api_key:
+                return JsonResponse({'error': 'HF_TOKEN not configured'}, status=500)
             
             # Initialize OpenAI client with Hugging Face endpoint
             client = OpenAI(
