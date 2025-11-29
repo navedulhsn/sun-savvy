@@ -53,3 +53,8 @@ Thumbs.db
 *.pdf
 *.docx
 
+# AI Models (large files - host externally)
+ai_models/*.h5
+ai_models/*.pt
+ai_models/*.pth
+ai_models/*.onnx
