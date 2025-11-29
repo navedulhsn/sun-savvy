@@ -35,6 +35,12 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link {% if status_filter == 'accepted' %}active{% endif %}"
+                                href="{% url 'provider_requests' %}?status=accepted">
+                                <i class="bi bi-check-lg me-1"></i>Accepted
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link {% if status_filter == 'in_progress' %}active{% endif %}"
                                 href="{% url 'provider_requests' %}?status=in_progress">
                                 <i class="bi bi-arrow-repeat me-1"></i>In Progress
@@ -47,9 +53,9 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if status_filter == 'rejected' %}active{% endif %}"
-                                href="{% url 'provider_requests' %}?status=rejected">
-                                <i class="bi bi-x-circle me-1"></i>Rejected
+                            <a class="nav-link {% if status_filter == 'cancelled' %}active{% endif %}"
+                                href="{% url 'provider_requests' %}?status=cancelled">
+                                <i class="bi bi-x-circle me-1"></i>Cancelled
                             </a>
                         </li>
                     </ul>
@@ -80,8 +86,7 @@
                                                 <i class="bi bi-person text-primary"></i>
                                             </div>
                                             <div>
-                                                <div class="fw-medium">{{
-                                                    request.user.get_full_name|default:request.user.username }}</div>
+                                                <div class="fw-medium">{{ request.user.get_full_name|default:request.user.username }}</div>
                                                 <small class="text-muted">{{ request.user.email }}</small>
                                             </div>
                                         </div>
@@ -99,6 +104,10 @@
                                         <span class="badge bg-warning text-dark">
                                             <i class="bi bi-clock me-1"></i>Pending
                                         </span>
+                                        {% elif request.status == 'accepted' %}
+                                        <span class="badge bg-primary">
+                                            <i class="bi bi-check-lg me-1"></i>Accepted
+                                        </span>
                                         {% elif request.status == 'in_progress' %}
                                         <span class="badge bg-info">
                                             <i class="bi bi-arrow-repeat me-1"></i>In Progress
@@ -107,9 +116,9 @@
                                         <span class="badge bg-success">
                                             <i class="bi bi-check-circle me-1"></i>Completed
                                         </span>
-                                        {% elif request.status == 'rejected' %}
+                                        {% elif request.status == 'cancelled' %}
                                         <span class="badge bg-danger">
-                                            <i class="bi bi-x-circle me-1"></i>Rejected
+                                            <i class="bi bi-x-circle me-1"></i>Cancelled
                                         </span>
                                         {% endif %}
                                     </td>

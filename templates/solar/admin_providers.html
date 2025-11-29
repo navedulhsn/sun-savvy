@@ -102,10 +102,18 @@
                                                     <span class="badge bg-danger">Email Not Verified</span>
                                                 {% endif %}
                                             </td>
-                                            <td>
+                                            <td class="d-flex gap-2">
                                                 <a href="{% url 'admin_provider_detail' provider.id %}" class="btn btn-sm btn-outline-success">
                                                     <i class="bi bi-eye"></i> View
                                                 </a>
+                                                {% if not provider.is_verified %}
+                                                <form method="post" action="{% url 'admin_provider_approve' provider.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-success">
+                                                        <i class="bi bi-check2-circle"></i> Approve
+                                                    </button>
+                                                </form>
+                                                {% endif %}
                                             </td>
                                         </tr>
                                     {% endfor %}

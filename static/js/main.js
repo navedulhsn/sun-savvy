@@ -6,6 +6,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Auto-dismiss alerts after 5 seconds
     autoDismissAlerts();
+
+    // Clean any stuck Bootstrap modal backdrops (prevents dim screen)
+    cleanupModalBackdrops();
+
+    // Ensure future modals also clean up properly
+    document.querySelectorAll('.modal').forEach(function (modalEl) {
+        modalEl.addEventListener('hidden.bs.modal', function () {
+            cleanupModalBackdrops();
+        });
+    });
 });
 
 // Chatbot functionality
@@ -161,4 +171,17 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         }
     });
 });
+
+// Clean up any stray Bootstrap modal backdrops that might block the UI
+function cleanupModalBackdrops() {
+    // Remove leftover backdrop overlays
+    document.querySelectorAll('.modal-backdrop').forEach(function (el) {
+        if (el && el.parentNode) {
+            el.parentNode.removeChild(el);
+        }
+    });
+    // Reset body state if a backdrop got stuck
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+}
 

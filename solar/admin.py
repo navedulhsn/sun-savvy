@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     UserProfile, ServiceProvider, AuthorizedPerson, SolarEstimation, 
-    Appliance, FaultDetection, ServiceRequest
+    Appliance, FaultDetection, ServiceRequest, ProviderPanel
 )
 
 
@@ -56,4 +56,12 @@ class ServiceRequestAdmin(admin.ModelAdmin):
     list_filter = ['status', 'service_type', 'requested_date']
     search_fields = ['user__username', 'service_provider__company_name', 'service_type']
     readonly_fields = ['requested_date']
+
+
+@admin.register(ProviderPanel)
+class ProviderPanelAdmin(admin.ModelAdmin):
+    list_display = ['name', 'provider', 'power_watts', 'price_pkr', 'stock', 'is_active', 'created_at']
+    list_filter = ['is_active', 'provider']
+    search_fields = ['name', 'provider__company_name']
+    list_editable = ['is_active', 'stock']
 

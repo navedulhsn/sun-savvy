@@ -82,7 +82,7 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <p class="text-muted mb-1 small">Potential Savings</p>
-                                    <h3 class="mb-0">${{ total_potential_savings|floatformat:0 }}</h3>
+                                    <h3 class="mb-0">PKR {{ total_potential_savings|floatformat:0 }}</h3>
                                 </div>
                                 <div class="bg-success bg-opacity-10 p-2 rounded">
                                     <i class="bi bi-piggy-bank-fill text-success fs-4"></i>
@@ -177,8 +177,7 @@
                         <div class="card-header bg-white border-0 py-3">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0"><i class="bi bi-calculator me-2"></i>Recent Estimations</h5>
-                                <a href="{% url 'estimation_history' %}" class="btn btn-sm btn-outline-primary">View
-                                    All</a>
+                                <a href="{% url 'estimation_history' %}" class="btn btn-sm btn-outline-primary">View All</a>
                             </div>
                         </div>
                         <div class="card-body p-0">
@@ -190,21 +189,13 @@
                                         <div class="flex-grow-1">
                                             <h6 class="mb-1">{{ estimation.address|truncatechars:40 }}</h6>
                                             <div class="d-flex gap-2 mb-2">
-                                                <span class="badge bg-success bg-opacity-10 text-success">
-                                                    {{ estimation.panel_capacity_kw|floatformat:1 }} kW
-                                                </span>
-                                                <span class="badge bg-primary bg-opacity-10 text-primary">
-                                                    {{ estimation.panels_needed }} panels
-                                                </span>
+                                                <span class="badge bg-success bg-opacity-10 text-success">{{ estimation.panel_capacity_kw|floatformat:1 }} kW</span>
+                                                <span class="badge bg-primary bg-opacity-10 text-primary">{{ estimation.panels_needed }} panels</span>
                                             </div>
-                                            <small class="text-muted">
-                                                <i class="bi bi-calendar me-1"></i>{{ estimation.created_at|date:"M d,
-                                                Y" }}
-                                            </small>
+                                            <small class="text-muted"><i class="bi bi-calendar me-1"></i>{{ estimation.created_at|date:"M d, Y" }}</small>
                                         </div>
                                         <div class="text-end">
-                                            <div class="fw-bold text-success">${{
-                                                estimation.annual_savings|floatformat:0 }}</div>
+                                            <div class="fw-bold text-success">PKR {{ estimation.annual_savings|floatformat:0 }}</div>
                                             <small class="text-muted">annual savings</small>
                                         </div>
                                     </div>
@@ -215,8 +206,7 @@
                             <div class="text-center py-5">
                                 <i class="bi bi-calculator text-muted" style="font-size: 3rem;"></i>
                                 <p class="text-muted mt-3 mb-2">No estimations yet</p>
-                                <a href="{% url 'solar_estimation' %}" class="btn btn-sm btn-primary">Start Your First
-                                    Estimation</a>
+                                <a href="{% url 'solar_estimation' %}" class="btn btn-sm btn-primary">Start Your First Estimation</a>
                             </div>
                             {% endif %}
                         </div>
@@ -241,10 +231,7 @@
                                         <div>
                                             <h6 class="mb-1">{{ request.service_provider.company_name }}</h6>
                                             <p class="mb-2 small">{{ request.service_type }}</p>
-                                            <small class="text-muted">
-                                                <i class="bi bi-calendar me-1"></i>{{ request.requested_date|date:"M d,
-                                                Y" }}
-                                            </small>
+                                            <small class="text-muted"><i class="bi bi-calendar me-1"></i>{{ request.requested_date|date:"M d, Y" }}</small>
                                         </div>
                                         <div>
                                             {% if request.status == 'pending' %}

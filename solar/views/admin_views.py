@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.contrib import messages
 from ..models import ServiceProvider, AuthorizedPerson, ServiceRequest
+from django.db.models import Q
 from .auth_views import is_authorized_person
 
 @login_required
@@ -52,15 +53,29 @@ def admin_user_delete(request, user_id):
 @user_passes_test(lambda u: u.is_superuser or u.is_staff or is_authorized_person(u))
 def admin_providers(request):
     """Admin: List all service providers"""
+    search_query = request.GET.get('search', '').strip()
     providers = ServiceProvider.objects.all().order_by('-created_at')
-    return render(request, 'solar/admin_providers.html', {'providers': providers})
+    if search_query:
+        providers = providers.filter(
+            Q(company_name__icontains=search_query) |
+            Q(email__icontains=search_query) |
+            Q(city__icontains=search_query)
+        )
+    return render(request, 'solar/admin_providers.html', {
+        'providers': providers,
+        'search_query': search_query,
+    })
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser or u.is_staff or is_authorized_person(u))
 def admin_provider_detail(request, provider_id):
     """Admin: Service provider detail"""
     provider = get_object_or_404(ServiceProvider, id=provider_id)
-    return render(request, 'solar/admin_provider_detail.html', {'provider': provider})
+    service_requests = ServiceRequest.objects.filter(service_provider=provider).order_by('-requested_date')
+    return render(request, 'solar/admin_provider_detail.html', {
+        'provider': provider,
+        'service_requests': service_requests,
+    })
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser or u.is_staff or is_authorized_person(u))

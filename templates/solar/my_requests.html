@@ -46,8 +46,7 @@
                                         {% endif %}
                                         <div>
                                             <h6 class="mb-0">{{ request.service_provider.company_name }}</h6>
-                                            <small class="text-muted">{{ request.service_provider.city }}, {{
-                                                request.service_provider.state }}</small>
+                                            <small class="text-muted">{{ request.service_provider.city}}, {{ request.service_provider.state }}</small>
                                         </div>
                                     </div>
                                 </div>
@@ -71,6 +70,10 @@
                                         <span class="badge bg-warning text-dark">
                                             <i class="bi bi-clock me-1"></i>Pending
                                         </span>
+                                        {% elif request.status == 'accepted' %}
+                                        <span class="badge bg-primary">
+                                            <i class="bi bi-check-lg me-1"></i>Accepted
+                                        </span>
                                         {% elif request.status == 'in_progress' %}
                                         <span class="badge bg-info">
                                             <i class="bi bi-arrow-repeat me-1"></i>In Progress
@@ -79,9 +82,9 @@
                                         <span class="badge bg-success">
                                             <i class="bi bi-check-circle me-1"></i>Completed
                                         </span>
-                                        {% elif request.status == 'rejected' %}
+                                        {% elif request.status == 'cancelled' %}
                                         <span class="badge bg-danger">
-                                            <i class="bi bi-x-circle me-1"></i>Rejected
+                                            <i class="bi bi-x-circle me-1"></i>Cancelled
                                         </span>
                                         {% endif %}
                                     </div>

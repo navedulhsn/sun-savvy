@@ -123,17 +123,21 @@ def provider_request_detail(request, request_id):
         action = request.POST.get('action')
         
         if action == 'accept':
+            service_request.status = 'accepted'
+            service_request.save()
+            messages.success(request, 'Request accepted.')
+        elif action == 'start':
             service_request.status = 'in_progress'
             service_request.save()
-            messages.success(request, 'Request accepted and marked as in progress.')
+            messages.success(request, 'Request marked as in progress.')
         elif action == 'complete':
             service_request.status = 'completed'
             service_request.save()
             messages.success(request, 'Request marked as completed.')
         elif action == 'reject':
-            service_request.status = 'rejected'
+            service_request.status = 'cancelled'
             service_request.save()
-            messages.success(request, 'Request rejected.')
+            messages.success(request, 'Request cancelled.')
         elif action == 'add_note':
             note = request.POST.get('note', '')
             if note:

@@ -31,6 +31,10 @@
                                     <span class="badge bg-warning text-dark fs-6">
                                         <i class="bi bi-clock me-1"></i>Pending Review
                                     </span>
+                                    {% elif service_request.status == 'accepted' %}
+                                    <span class="badge bg-primary fs-6">
+                                        <i class="bi bi-check-lg me-1"></i>Accepted
+                                    </span>
                                     {% elif service_request.status == 'in_progress' %}
                                     <span class="badge bg-info fs-6">
                                         <i class="bi bi-arrow-repeat me-1"></i>In Progress
@@ -39,9 +43,9 @@
                                     <span class="badge bg-success fs-6">
                                         <i class="bi bi-check-circle me-1"></i>Completed
                                     </span>
-                                    {% elif service_request.status == 'rejected' %}
+                                    {% elif service_request.status == 'cancelled' %}
                                     <span class="badge bg-danger fs-6">
-                                        <i class="bi bi-x-circle me-1"></i>Rejected
+                                        <i class="bi bi-x-circle me-1"></i>Cancelled
                                     </span>
                                     {% endif %}
                                 </div>
@@ -62,6 +66,14 @@
                                         </button>
                                     </form>
                                 </div>
+                                {% elif service_request.status == 'accepted' %}
+                                <form method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="start">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-play-fill me-1"></i>Start Work
+                                    </button>
+                                </form>
                                 {% elif service_request.status == 'in_progress' %}
                                 <form method="post" class="d-inline">
                                     {% csrf_token %}
@@ -111,21 +123,15 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="text-muted small">Name</label>
-                                    <p class="mb-0 fw-medium">{{
-                                        service_request.user.get_full_name|default:service_request.user.username }}</p>
+                                    <p class="mb-0 fw-medium">{{ service_request.user.get_full_name|default:service_request.user.username }}</p>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="text-muted small">Email</label>
-                                    <p class="mb-0">
-                                        <a href="mailto:{{ service_request.user.email }}">{{ service_request.user.email
-                                            }}</a>
-                                    </p>
+                                    <p class="mb-0"><a href="mailto:{{ service_request.user.email }}">{{ service_request.user.email }}</a></p>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="text-muted small">Phone</label>
-                                    <p class="mb-0">
-                                        <a href="tel:{{ service_request.phone }}">{{ service_request.phone }}</a>
-                                    </p>
+                                    <p class="mb-0"><a href="tel:{{ service_request.phone }}">{{ service_request.phone }}</a></p>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="text-muted small">Member Since</label>
@@ -145,8 +151,7 @@
                         </div>
                         <div class="card-body">
                             <div class="d-grid gap-2">
-                                <a href="mailto:{{ service_request.user.email }}"
-                                    class="btn btn-outline-primary btn-sm">
+                                <a href="mailto:{{ service_request.user.email }}" class="btn btn-outline-primary btn-sm">
                                     <i class="bi bi-envelope me-1"></i>Email Customer
                                 </a>
                                 <a href="tel:{{ service_request.phone }}" class="btn btn-outline-success btn-sm">
@@ -190,26 +195,16 @@
                                 <div class="timeline-item">
                                     <div class="timeline-marker bg-primary"></div>
                                     <div class="timeline-content">
-                                        <small class="text-muted">{{ service_request.requested_date|date:"M d, Y - h:i
-                                            A" }}</small>
+                                        <small class="text-muted">{{ service_request.requested_date|date:"M d, Y - h:i A" }}</small>
                                         <p class="mb-0 small">Request submitted</p>
                                     </div>
                                 </div>
                                 {% if service_request.status != 'pending' %}
                                 <div class="timeline-item">
-                                    <div
-                                        class="timeline-marker {% if service_request.status == 'rejected' %}bg-danger{% else %}bg-success{% endif %}">
-                                    </div>
+                                    <div class="timeline-marker {% if service_request.status == 'cancelled' %}bg-danger{% else %}bg-success{% endif %}"></div>
                                     <div class="timeline-content">
-                                        <small class="text-muted">{{ service_request.requested_date|date:"M d, Y"
-                                            }}</small>
-                                        <p class="mb-0 small">
-                                            {% if service_request.status == 'rejected' %}
-                                            Request rejected
-                                            {% else %}
-                                            Request accepted
-                                            {% endif %}
-                                        </p>
+                                        <small class="text-muted">{{ service_request.requested_date|date:"M d, Y" }}</small>
+                                        <p class="mb-0 small">{% if service_request.status == 'cancelled' %}Request cancelled{% else %}Request accepted{% endif %}</p>
                                     </div>
                                 </div>
                                 {% endif %}
@@ -217,8 +212,7 @@
                                 <div class="timeline-item">
                                     <div class="timeline-marker bg-success"></div>
                                     <div class="timeline-content">
-                                        <small class="text-muted">{{ service_request.requested_date|date:"M d, Y"
-                                            }}</small>
+                                        <small class="text-muted">{{ service_request.requested_date|date:"M d, Y" }}</small>
                                         <p class="mb-0 small">Service completed</p>
                                     </div>
                                 </div>

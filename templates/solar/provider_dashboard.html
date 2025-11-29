@@ -81,192 +81,190 @@
                     <a href="{% url 'provider_profile_edit' %}" class="btn btn-sm btn-primary ms-3">Complete Profile</a>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% endif %}
+            </div>
+            {% endif %}
 
-        <!-- Statistics Cards -->
-        <div class="row g-3 mb-4">
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <p class="text-muted mb-1 small">Total Requests</p>
-                                <h3 class="mb-0">{{ total_requests }}</h3>
+            <!-- Statistics Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <p class="text-muted mb-1 small">Total Requests</p>
+                                    <h3 class="mb-0">{{ total_requests }}</h3>
+                                </div>
+                                <div class="bg-primary bg-opacity-10 p-2 rounded">
+                                    <i class="bi bi-inbox-fill text-primary fs-4"></i>
+                                </div>
                             </div>
-                            <div class="bg-primary bg-opacity-10 p-2 rounded">
-                                <i class="bi bi-inbox-fill text-primary fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <p class="text-muted mb-1 small">Pending</p>
+                                    <h3 class="mb-0 text-warning">{{ total_pending }}</h3>
+                                </div>
+                                <div class="bg-warning bg-opacity-10 p-2 rounded">
+                                    <i class="bi bi-clock-fill text-warning fs-4"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <p class="text-muted mb-1 small">Completed</p>
+                                    <h3 class="mb-0 text-success">{{ total_completed }}</h3>
+                                </div>
+                                <div class="bg-success bg-opacity-10 p-2 rounded">
+                                    <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <p class="text-muted mb-1 small">Completion Rate</p>
+                                    <h3 class="mb-0">{{ completion_rate }}%</h3>
+                                </div>
+                                <div class="bg-info bg-opacity-10 p-2 rounded">
+                                    <i class="bi bi-graph-up text-info fs-4"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <p class="text-muted mb-1 small">Pending</p>
-                                <h3 class="mb-0 text-warning">{{ total_pending }}</h3>
-                            </div>
-                            <div class="bg-warning bg-opacity-10 p-2 rounded">
-                                <i class="bi bi-clock-fill text-warning fs-4"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <p class="text-muted mb-1 small">Completed</p>
-                                <h3 class="mb-0 text-success">{{ total_completed }}</h3>
-                            </div>
-                            <div class="bg-success bg-opacity-10 p-2 rounded">
-                                <i class="bi bi-check-circle-fill text-success fs-4"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <p class="text-muted mb-1 small">Completion Rate</p>
-                                <h3 class="mb-0">{{ completion_rate }}%</h3>
-                            </div>
-                            <div class="bg-info bg-opacity-10 p-2 rounded">
-                                <i class="bi bi-graph-up text-info fs-4"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Recent Requests -->
-        <div class="row g-3">
-            <div class="col-lg-8">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white border-0 py-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Recent Requests</h5>
-                            <a href="{% url 'provider_requests' %}" class="btn btn-sm btn-outline-primary">View All</a>
+            <!-- Recent Requests -->
+            <div class="row g-3">
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0 py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Recent Requests</h5>
+                                <a href="{% url 'provider_requests' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                            </div>
                         </div>
-                    </div>
-                    <div class="card-body p-0">
-                        {% if all_requests %}
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Customer</th>
-                                        <th>Service</th>
-                                        <th>Date</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for request in all_requests %}
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-2">
-                                                    <i class="bi bi-person text-primary"></i>
-                                                </div>
-                                                <div>
-                                                    <div class="fw-medium">{{
-                                                        request.user.get_full_name|default:request.user.username }}
+                        <div class="card-body p-0">
+                            {% if all_requests %}
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Customer</th>
+                                            <th>Service</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for request in all_requests %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-2">
+                                                        <i class="bi bi-person text-primary"></i>
                                                     </div>
-                                                    <small class="text-muted">{{ request.phone }}</small>
+                                                    <div>
+                                                        <div class="fw-medium">{{ request.user.get_full_name|default:request.user.username }}</div>
+                                                        <small class="text-muted">{{ request.phone }}</small>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td>{{ request.service_type }}</td>
-                                        <td>{{ request.requested_date|date:"M d, Y" }}</td>
-                                        <td>
-                                            {% if request.status == 'pending' %}
-                                            <span class="badge bg-warning text-dark">Pending</span>
-                                            {% elif request.status == 'in_progress' %}
-                                            <span class="badge bg-info">In Progress</span>
-                                            {% elif request.status == 'completed' %}
-                                            <span class="badge bg-success">Completed</span>
-                                            {% elif request.status == 'rejected' %}
-                                            <span class="badge bg-danger">Rejected</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <a href="{% url 'provider_request_detail' request.id %}"
-                                                class="btn btn-sm btn-outline-primary">
-                                                <i class="bi bi-eye"></i> View
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        {% else %}
-                        <div class="text-center py-5">
-                            <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
-                            <p class="text-muted mt-3">No requests yet</p>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Stats -->
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm mb-3">
-                    <div class="card-header bg-white border-0 py-3">
-                        <h6 class="mb-0">Profile Status</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="small">Profile Completion</span>
-                                <span class="small fw-bold">{{ profile_completion }}%</span>
+                                            </td>
+                                            <td>{{ request.service_type }}</td>
+                                            <td>{{ request.requested_date|date:"M d, Y" }}</td>
+                                            <td>
+                                                {% if request.status == 'pending' %}
+                                                <span class="badge bg-warning text-dark">Pending</span>
+                                                {% elif request.status == 'accepted' %}
+                                                <span class="badge bg-primary">Accepted</span>
+                                                {% elif request.status == 'in_progress' %}
+                                                <span class="badge bg-info">In Progress</span>
+                                                {% elif request.status == 'completed' %}
+                                                <span class="badge bg-success">Completed</span>
+                                                {% elif request.status == 'cancelled' %}
+                                                <span class="badge bg-danger">Cancelled</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'provider_request_detail' request.id %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
                             </div>
-                            <div class="progress" style="height: 8px;">
-                                <div class="progress-bar bg-success" style="width: {{ profile_completion }}%"></div>
+                            {% else %}
+                            <div class="text-center py-5">
+                                <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+                                <p class="text-muted mt-3">No requests yet</p>
                             </div>
-                        </div>
-                        <div class="d-grid">
-                            <a href="{% url 'provider_profile_edit' %}" class="btn btn-primary btn-sm">
-                                <i class="bi bi-pencil me-1"></i>Edit Profile
-                            </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
 
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white border-0 py-3">
-                        <h6 class="mb-0">Quick Actions</h6>
+                <!-- Quick Stats -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-header bg-white border-0 py-3">
+                            <h6 class="mb-0">Profile Status</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="small">Profile Completion</span>
+                                    <span class="small fw-bold">{{ profile_completion }}%</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-success" style="width: {{ profile_completion }}%"></div>
+                                </div>
+                            </div>
+                            <div class="d-grid">
+                                <a href="{% url 'provider_profile_edit' %}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-pencil me-1"></i>Edit Profile
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="d-grid gap-2">
-                            <a href="{% url 'provider_requests' %}?status=pending"
-                                class="btn btn-outline-warning btn-sm">
-                                <i class="bi bi-clock me-1"></i>View Pending Requests
-                            </a>
-                            <a href="{% url 'provider_services' %}" class="btn btn-outline-primary btn-sm">
-                                <i class="bi bi-tools me-1"></i>Manage Services
-                            </a>
-                            <a href="{% url 'provider_profile_edit' %}" class="btn btn-outline-secondary btn-sm">
-                                <i class="bi bi-gear me-1"></i>Settings
-                            </a>
+
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0 py-3">
+                            <h6 class="mb-0">Quick Actions</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'provider_requests' %}?status=pending" class="btn btn-outline-warning btn-sm">
+                                    <i class="bi bi-clock me-1"></i>View Pending Requests
+                                </a>
+                                <a href="{% url 'provider_services' %}" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-tools me-1"></i>Manage Services
+                                </a>
+                                <a href="{% url 'provider_profile_edit' %}" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-gear me-1"></i>Settings
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 </div>
 {% endblock %}
