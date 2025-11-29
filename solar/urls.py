@@ -18,6 +18,10 @@ urlpatterns = [
     # Dashboard
     path('dashboard/', views.dashboard, name='dashboard'),
     path('provider/dashboard/', views.provider_dashboard, name='provider_dashboard'),
+    path('provider/profile/edit/', views.provider_profile_edit, name='provider_profile_edit'),
+    path('provider/requests/', views.provider_requests, name='provider_requests'),
+    path('provider/requests/<int:request_id>/', views.provider_request_detail, name='provider_request_detail'),
+    path('provider/services/', views.provider_services, name='provider_services'),
     # Note: Admin dashboard URLs are now in sunsavvy/urls.py to avoid conflicts with Django admin
     
     # Solar Estimation

@@ -4,6 +4,10 @@ Django settings for sunsavvy project.
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Try to use python-decouple for environment variables, fallback to os.environ
 try:

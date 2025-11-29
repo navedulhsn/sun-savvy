@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Request #{{ service_request.id }} - Provider Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">Request #{{ service_request.id }}</h2>
+                    <p class="text-muted mb-0">Requested on {{ service_request.requested_date|date:"F d, Y" }}</p>
+                </div>
+                <a href="{% url 'provider_requests' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Requests
+                </a>
+            </div>
+
+            <div class="row g-4">
+                <!-- Request Details -->
+                <div class="col-lg-8">
+                    <!-- Status Card -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">Status</h5>
+                                    {% if service_request.status == 'pending' %}
+                                    <span class="badge bg-warning text-dark fs-6">
+                                        <i class="bi bi-clock me-1"></i>Pending Review
+                                    </span>
+                                    {% elif service_request.status == 'in_progress' %}
+                                    <span class="badge bg-info fs-6">
+                                        <i class="bi bi-arrow-repeat me-1"></i>In Progress
+                                    </span>
+                                    {% elif service_request.status == 'completed' %}
+                                    <span class="badge bg-success fs-6">
+                                        <i class="bi bi-check-circle me-1"></i>Completed
+                                    </span>
+                                    {% elif service_request.status == 'rejected' %}
+                                    <span class="badge bg-danger fs-6">
+                                        <i class="bi bi-x-circle me-1"></i>Rejected
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                {% if service_request.status == 'pending' %}
+                                <div class="btn-group">
+                                    <form method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="accept">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="bi bi-check-lg me-1"></i>Accept
+                                        </button>
+                                    </form>
+                                    <form method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="reject">
+                                        <button type="submit" class="btn btn-danger">
+                                            <i class="bi bi-x-lg me-1"></i>Reject
+                                        </button>
+                                    </form>
+                                </div>
+                                {% elif service_request.status == 'in_progress' %}
+                                <form method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="complete">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-check-circle me-1"></i>Mark as Completed
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service Details -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0"><i class="bi bi-tools me-2"></i>Service Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="text-muted small">Service Type</label>
+                                    <p class="mb-0 fw-medium">{{ service_request.service_type }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="text-muted small">Requested Date</label>
+                                    <p class="mb-0 fw-medium">{{ service_request.requested_date|date:"F d, Y" }}</p>
+                                </div>
+                                <div class="col-12">
+                                    <label class="text-muted small">Description</label>
+                                    <p class="mb-0">{{ service_request.description }}</p>
+                                </div>
+                                <div class="col-12">
+                                    <label class="text-muted small">Service Address</label>
+                                    <p class="mb-0">{{ service_request.address }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customer Information -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0"><i class="bi bi-person me-2"></i>Customer Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="text-muted small">Name</label>
+                                    <p class="mb-0 fw-medium">{{
+                                        service_request.user.get_full_name|default:service_request.user.username }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="text-muted small">Email</label>
+                                    <p class="mb-0">
+                                        <a href="mailto:{{ service_request.user.email }}">{{ service_request.user.email
+                                            }}</a>
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="text-muted small">Phone</label>
+                                    <p class="mb-0">
+                                        <a href="tel:{{ service_request.phone }}">{{ service_request.phone }}</a>
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="text-muted small">Member Since</label>
+                                    <p class="mb-0">{{ service_request.user.date_joined|date:"F Y" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions Sidebar -->
+                <div class="col-lg-4">
+                    <!-- Quick Actions -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="mb-0">Quick Actions</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="mailto:{{ service_request.user.email }}"
+                                    class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-envelope me-1"></i>Email Customer
+                                </a>
+                                <a href="tel:{{ service_request.phone }}" class="btn btn-outline-success btn-sm">
+                                    <i class="bi bi-telephone me-1"></i>Call Customer
+                                </a>
+                                {% if service_request.status == 'pending' %}
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="accept">
+                                    <button type="submit" class="btn btn-success btn-sm w-100">
+                                        <i class="bi bi-check-lg me-1"></i>Accept Request
+                                    </button>
+                                </form>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit" class="btn btn-danger btn-sm w-100">
+                                        <i class="bi bi-x-lg me-1"></i>Reject Request
+                                    </button>
+                                </form>
+                                {% elif service_request.status == 'in_progress' %}
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="complete">
+                                    <button type="submit" class="btn btn-success btn-sm w-100">
+                                        <i class="bi bi-check-circle me-1"></i>Mark Completed
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="mb-0">Timeline</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-primary"></div>
+                                    <div class="timeline-content">
+                                        <small class="text-muted">{{ service_request.requested_date|date:"M d, Y - h:i
+                                            A" }}</small>
+                                        <p class="mb-0 small">Request submitted</p>
+                                    </div>
+                                </div>
+                                {% if service_request.status != 'pending' %}
+                                <div class="timeline-item">
+                                    <div
+                                        class="timeline-marker {% if service_request.status == 'rejected' %}bg-danger{% else %}bg-success{% endif %}">
+                                    </div>
+                                    <div class="timeline-content">
+                                        <small class="text-muted">{{ service_request.requested_date|date:"M d, Y"
+                                            }}</small>
+                                        <p class="mb-0 small">
+                                            {% if service_request.status == 'rejected' %}
+                                            Request rejected
+                                            {% else %}
+                                            Request accepted
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if service_request.status == 'completed' %}
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-success"></div>
+                                    <div class="timeline-content">
+                                        <small class="text-muted">{{ service_request.requested_date|date:"M d, Y"
+                                            }}</small>
+                                        <p class="mb-0 small">Service completed</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-bottom: 20px;
+    }
+
+    .timeline-item:not(:last-child)::before {
+        content: '';
+        position: absolute;
+        left: -24px;
+        top: 12px;
+        bottom: -8px;
+        width: 2px;
+        background: #dee2e6;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -30px;
+        top: 4px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid white;
+        box-shadow: 0 0 0 2px currentColor;
+    }
+</style>
+{% endblock %}

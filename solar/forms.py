@@ -1,7 +1,12 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from .models import ServiceProvider, AuthorizedPerson, SolarEstimation, ServiceRequest, FaultDetection
+
+
+class LoginForm(AuthenticationForm):
+    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}))
 
 
 class UserRegistrationForm(UserCreationForm):
@@ -152,3 +157,36 @@ class FaultDetectionForm(forms.ModelForm):
         model = FaultDetection
         fields = ['image']
 
+
+class ServiceProviderProfileForm(forms.ModelForm):
+    """Comprehensive form for service provider profile management"""
+    
+    class Meta:
+        model = ServiceProvider
+        fields = [
+            'company_name', 'phone', 'email', 'address', 'city', 'state', 'zip_code',
+            'company_logo', 'business_description', 'years_in_business', 'business_hours',
+            'website', 'service_areas', 'service_radius', 'services_offered',
+            'license_number', 'certifications', 'price_per_watt', 'installation_cost_per_watt'
+        ]
+        widgets = {
+            'company_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'city': forms.TextInput(attrs={'class': 'form-control'}),
+            'state': forms.TextInput(attrs={'class': 'form-control'}),
+            'zip_code': forms.TextInput(attrs={'class': 'form-control'}),
+            'company_logo': forms.FileInput(attrs={'class': 'form-control'}),
+            'business_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'years_in_business': forms.NumberInput(attrs={'class': 'form-control'}),
+            'business_hours': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Mon-Fri 9AM-5PM'}),
+            'website': forms.URLInput(attrs={'class': 'form-control'}),
+            'service_areas': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'e.g., New York, Brooklyn, Queens'}),
+            'service_radius': forms.NumberInput(attrs={'class': 'form-control'}),
+            'services_offered': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Installation, Repair, Maintenance'}),
+            'license_number': forms.TextInput(attrs={'class': 'form-control'}),
+            'certifications': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'price_per_watt': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'installation_cost_per_watt': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+        }

@@ -1,0 +1,102 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Glassmorphism utilities */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.navbar {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-nav .nav-item .btn-primary {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inline-block !important;
+}
+
+.navbar .btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: white !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inline-block !important;
+    transition: all 0.3s ease;
+}
+
+.navbar .btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+    opacity: 1 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+}
+
+.navbar .nav-link {
+    color: #212529 !important;
+    font-weight: 500;
+}
+
+.navbar .nav-link:hover {
+    color: #0d6efd !important;
+}
+
+main {
+    flex: 1;
+}
+
+.hover-shadow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.transition-all {
+    transition: all 0.3s ease;
+}
+
+/* Chatbot Styles */
+.chatbot-message {
+    margin-bottom: 10px;
+    padding: 10px 15px;
+    border-radius: 15px;
+    max-width: 80%;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.chatbot-message.user {
+    background-color: #0d6efd;
+    color: white;
+    align-self: flex-end;
+    margin-left: auto;
+    border-bottom-right-radius: 5px;
+}
+
+.chatbot-message.bot {
+    background-color: #e9ecef;
+    color: #212529;
+    align-self: flex-start;
+    margin-right: auto;
+    border-bottom-left-radius: 5px;
+}
+
+#chatbot-messages {
+    display: flex;
+    flex-direction: column;
+}

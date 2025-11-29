@@ -142,7 +142,7 @@ def calculate_financial_analysis(panels_needed, annual_energy_generated, monthly
     }
 
 
-def calculate_savings_roi(location_result, energy_result, roof_result, selected_panel_option_index=0, electricity_rate=None):
+def calculate_savings_roi(location_result, energy_result, roof_result, selected_panel_option_index=0, electricity_rate=None, provider_rates=None):
     """
     Comprehensive Savings & ROI Calculation
     Uses results from Location, Energy, and Roof modules
@@ -153,6 +153,7 @@ def calculate_savings_roi(location_result, energy_result, roof_result, selected_
         roof_result: dict with panel options
         selected_panel_option_index: which panel option to use (default: 0 = recommended)
         electricity_rate: custom electricity rate per kWh (optional)
+        provider_rates: dict with 'price_per_watt' and 'installation_cost_per_watt' (optional)
     """
     if not (location_result and energy_result and roof_result):
         return None
@@ -178,13 +179,17 @@ def calculate_savings_roi(location_result, energy_result, roof_result, selected_
         panel_area = Decimal(str(panel_specs.get('area_sqm', 2.0)))
         panel_power = panel_specs.get('power_watts', 400)
         panel_efficiency = Decimal(str(panel_specs.get('efficiency', 0.20)))
-        panel_cost_per_panel = panel_specs.get('cost_per_panel', 240)
+        # Use provider rate if available, otherwise use default
+        if provider_rates and 'price_per_watt' in provider_rates:
+             panel_cost_per_panel = Decimal(str(provider_rates['price_per_watt'])) * panel_power
+        else:
+             panel_cost_per_panel = Decimal(str(panel_specs.get('cost_per_panel', 240)))
     else:
         # Fallback to defaults if panel_specs is missing
         panel_area = Decimal('2.0')
         panel_power = 400
         panel_efficiency = Decimal('0.20')
-        panel_cost_per_panel = 240
+        panel_cost_per_panel = Decimal('240')
     
     # Calculate actual panels needed based on consumption
     annual_consumption = monthly_consumption_kwh * Decimal('12')
@@ -212,11 +217,16 @@ def calculate_savings_roi(location_result, energy_result, roof_result, selected_
     annual_energy_generated = calculate_solar_potential(irradiance, total_panel_area)
     
     # Cost calculations
-    panel_cost = Decimal(str(panels_needed * panel_cost_per_panel))
+    panel_cost = Decimal(str(panels_needed)) * panel_cost_per_panel
     
     # Installation and additional costs
-    installation_cost_per_watt = Decimal('0.30')
-    installation_cost = (panels_needed * panel_power * installation_cost_per_watt) / Decimal('1000')
+    if provider_rates and 'installation_cost_per_watt' in provider_rates:
+        installation_cost_per_watt = Decimal(str(provider_rates['installation_cost_per_watt']))
+    else:
+        installation_cost_per_watt = Decimal('0.30')
+        
+    installation_cost = (panels_needed * panel_power * installation_cost_per_watt)
+    
     inverter_cost = system_capacity_kw * Decimal('200')
     wiring_mounting = system_capacity_kw * Decimal('100')
     permits_inspection = system_capacity_kw * Decimal('50')
@@ -337,6 +347,10 @@ def calculate_panel_capacity_options(rooftop_area):
     Calculate how many panels of each type can fit on the rooftop
     Returns list of options with panel counts, capacity, and cost
     """
+    # Convert to Decimal if it's not already
+    if not isinstance(rooftop_area, Decimal):
+        rooftop_area = Decimal(str(rooftop_area))
+    
     panel_types = get_panel_types()
     options = []
     
@@ -405,35 +419,73 @@ def calculate_appliance_consumption(selected_appliances):
 
 def detect_fault_ai(image_path):
     """
-    AI-based fault detection for solar panels
-    This is a placeholder - integrate with actual CNN model
+    AI-based fault detection for solar panels using VGG16
     """
-    # TODO: Integrate with trained CNN model
-    # For now, return mock results
-    
-    # In production, this would:
-    # 1. Load the trained CNN model
-    # 2. Preprocess the image
-    # 3. Run inference
-    # 4. Return detection results
-    
-    import random
-    fault_types = ['Crack', 'Dirt', 'Shading', 'Discoloration', 'Normal']
-    fault_type = random.choice(fault_types)
-    confidence = Decimal(str(random.uniform(0.75, 0.99)))
-    
-    descriptions = {
-        'Crack': 'Cracks detected in solar panel. May reduce efficiency and require repair.',
-        'Dirt': 'Dirt accumulation detected. Cleaning recommended to restore efficiency.',
-        'Shading': 'Shading detected. Consider repositioning panels or removing obstructions.',
-        'Discoloration': 'Discoloration detected. May indicate degradation or damage.',
-        'Normal': 'No significant faults detected. Panel appears to be in good condition.'
-    }
-    
-    return {
-        'fault_type': fault_type,
-        'confidence_score': float(confidence),
-        'description': descriptions.get(fault_type, 'Analysis complete.'),
-        'recommendations': 'Regular maintenance recommended.' if fault_type != 'Normal' else 'Continue regular monitoring.'
-    }
+    try:
+        import numpy as np
+        from tensorflow.keras.models import load_model
+        from tensorflow.keras.preprocessing import image
+        from django.conf import settings
+        import os
+
+        # Path to the model
+        model_path = os.path.join(settings.BASE_DIR, 'ai_models', 'physical_fault_detection_vgg16_finetuned.h5')
+        
+        if not os.path.exists(model_path):
+            return {
+                'fault_type': 'Error',
+                'confidence_score': 0.0,
+                'description': 'AI Model not found.',
+                'recommendations': 'Please contact administrator.'
+            }
+
+        # Load model
+        model = load_model(model_path)
+        
+        # Preprocess image
+        img = image.load_img(image_path, target_size=(224, 224))
+        img_array = image.img_to_array(img)
+        img_array = np.expand_dims(img_array, axis=0)
+        img_array /= 255.0
+        
+        # Predict
+        predictions = model.predict(img_array)
+        class_indices = {0: 'Bird-drop', 1: 'Clean', 2: 'Dusty', 3: 'Electrical-damage', 4: 'Physical-Damage', 5: 'Snow-Covered'}
+        predicted_class_index = np.argmax(predictions)
+        fault_type = class_indices.get(predicted_class_index, 'Unknown')
+        confidence = float(predictions[0][predicted_class_index])
+        
+        descriptions = {
+            'Bird-drop': 'Bird droppings detected. This can create hot spots and reduce efficiency.',
+            'Clean': 'Panel appears clean and in good condition.',
+            'Dusty': 'Dust accumulation detected. Cleaning is recommended to restore efficiency.',
+            'Electrical-damage': 'Potential electrical damage detected. Professional inspection required immediately.',
+            'Physical-Damage': 'Physical damage (cracks/breakage) detected. Panel may need replacement.',
+            'Snow-Covered': 'Snow coverage detected. Remove snow to restore power generation.'
+        }
+        
+        recommendations = {
+            'Bird-drop': 'Clean the panel with water and a soft sponge.',
+            'Clean': 'Continue regular monitoring.',
+            'Dusty': 'Wash the panels with water.',
+            'Electrical-damage': 'Contact a certified solar technician for inspection.',
+            'Physical-Damage': 'Contact your installer for warranty or replacement options.',
+            'Snow-Covered': 'Carefully remove snow using a soft roof rake.'
+        }
+
+        return {
+            'fault_type': fault_type,
+            'confidence_score': confidence,
+            'description': descriptions.get(fault_type, 'Analysis complete.'),
+            'recommendations': recommendations.get(fault_type, 'Regular maintenance recommended.')
+        }
+        
+    except Exception as e:
+        print(f"AI Detection Error: {e}")
+        return {
+            'fault_type': 'Error',
+            'confidence_score': 0.0,
+            'description': f'Error during analysis: {str(e)}',
+            'recommendations': 'Try uploading a clearer image.'
+        }
 

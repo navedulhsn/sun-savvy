@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - Provider Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">Edit Profile</h2>
+                    <p class="text-muted mb-0">Update your business information and credentials</p>
+                </div>
+                <a href="{% url 'provider_dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                </a>
+            </div>
+
+            <!-- Profile Completion -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">Profile Completion</h6>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-success" role="progressbar"
+                                    style="width: {{ provider.profile_completion_percentage }}%"></div>
+                            </div>
+                        </div>
+                        <div class="ms-4">
+                            <h4 class="mb-0">{{ provider.profile_completion_percentage }}%</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Form -->
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- Basic Information -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0"><i class="bi bi-building me-2"></i>Basic Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Company Name *</label>
+                                {{ form.company_name }}
+                                {% if form.company_name.errors %}
+                                <div class="text-danger small">{{ form.company_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Phone *</label>
+                                {{ form.phone }}
+                                {% if form.phone.errors %}
+                                <div class="text-danger small">{{ form.phone.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Email *</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                <div class="text-danger small">{{ form.email.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Website</label>
+                                {{ form.website }}
+                                {% if form.website.errors %}
+                                <div class="text-danger small">{{ form.website.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-medium">Business Description</label>
+                                {{ form.business_description }}
+                                <small class="text-muted">Describe your company and what makes you unique</small>
+                                {% if form.business_description.errors %}
+                                <div class="text-danger small">{{ form.business_description.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Years in Business</label>
+                                {{ form.years_in_business }}
+                                {% if form.years_in_business.errors %}
+                                <div class="text-danger small">{{ form.years_in_business.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Business Hours</label>
+                                {{ form.business_hours }}
+                                {% if form.business_hours.errors %}
+                                <div class="text-danger small">{{ form.business_hours.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location & Address -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0"><i class="bi bi-geo-alt me-2"></i>Location & Address</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-medium">Address *</label>
+                                {{ form.address }}
+                                {% if form.address.errors %}
+                                <div class="text-danger small">{{ form.address.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">City *</label>
+                                {{ form.city }}
+                                {% if form.city.errors %}
+                                <div class="text-danger small">{{ form.city.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">State *</label>
+                                {{ form.state }}
+                                {% if form.state.errors %}
+                                <div class="text-danger small">{{ form.state.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">ZIP Code *</label>
+                                {{ form.zip_code }}
+                                {% if form.zip_code.errors %}
+                                <div class="text-danger small">{{ form.zip_code.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service Areas -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0"><i class="bi bi-map me-2"></i>Service Areas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label fw-medium">Service Areas</label>
+                                {{ form.service_areas }}
+                                <small class="text-muted">Enter cities/regions you serve, separated by commas</small>
+                                {% if form.service_areas.errors %}
+                                <div class="text-danger small">{{ form.service_areas.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Service Radius (miles)</label>
+                                {{ form.service_radius }}
+                                {% if form.service_radius.errors %}
+                                <div class="text-danger small">{{ form.service_radius.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-medium">Services Offered *</label>
+                                {{ form.services_offered }}
+                                <small class="text-muted">e.g., Installation, Repair, Maintenance, Inspection</small>
+                                {% if form.services_offered.errors %}
+                                <div class="text-danger small">{{ form.services_offered.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Credentials & Certifications -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0"><i class="bi bi-award me-2"></i>Credentials & Certifications</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">License Number</label>
+                                {{ form.license_number }}
+                                {% if form.license_number.errors %}
+                                <div class="text-danger small">{{ form.license_number.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Company Logo</label>
+                                {{ form.company_logo }}
+                                {% if provider.company_logo %}
+                                <div class="mt-2">
+                                    <img src="{{ provider.company_logo.url }}" alt="Current logo" class="img-thumbnail"
+                                        style="max-width: 150px;">
+                                </div>
+                                {% endif %}
+                                {% if form.company_logo.errors %}
+                                <div class="text-danger small">{{ form.company_logo.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-medium">Certifications</label>
+                                {{ form.certifications }}
+                                <small class="text-muted">List your certifications (e.g., NABCEP, OSHA, etc.)</small>
+                                {% if form.certifications.errors %}
+                                <div class="text-danger small">{{ form.certifications.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pricing -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0"><i class="bi bi-currency-dollar me-2"></i>Pricing</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Price per Watt (USD)</label>
+                                {{ form.price_per_watt }}
+                                <small class="text-muted">Your standard price per watt for solar panels</small>
+                                {% if form.price_per_watt.errors %}
+                                <div class="text-danger small">{{ form.price_per_watt.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Installation Cost per Watt (USD)</label>
+                                {{ form.installation_cost_per_watt }}
+                                <small class="text-muted">Installation labor cost per watt</small>
+                                {% if form.installation_cost_per_watt.errors %}
+                                <div class="text-danger small">{{ form.installation_cost_per_watt.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="d-flex gap-2 justify-content-end">
+                    <a href="{% url 'provider_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-1"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
