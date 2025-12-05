@@ -102,6 +102,33 @@
                                     <label class="text-muted small">Requested Date</label>
                                     <p class="mb-0 fw-medium">{{ service_request.requested_date|date:"F d, Y" }}</p>
                                 </div>
+                                {% if service_request.request_category %}
+                                <div class="col-12">
+                                    <label class="text-muted small">Request Type</label>
+                                    <p class="mb-0">
+                                        <span class="badge bg-primary">{{ service_request.get_request_category_display }}</span>
+                                    </p>
+                                </div>
+                                {% endif %}
+                                {% if service_request.selected_panel %}
+                                <div class="col-12">
+                                    <label class="text-muted small">Selected Panel</label>
+                                    <p class="mb-0">
+                                        <strong>{{ service_request.selected_panel.name }}</strong> ({{ service_request.selected_panel.power_watts }}W)
+                                        {% if service_request.quantity > 1 %}
+                                        - Quantity: {{ service_request.quantity }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                {% endif %}
+                                {% if service_request.preferred_panel_type %}
+                                <div class="col-12">
+                                    <label class="text-muted small">Preferred Panel Type</label>
+                                    <p class="mb-0">
+                                        <span class="badge bg-success">{{ service_request.get_preferred_panel_type_display }}</span>
+                                    </p>
+                                </div>
+                                {% endif %}
                                 <div class="col-12">
                                     <label class="text-muted small">Description</label>
                                     <p class="mb-0">{{ service_request.description }}</p>

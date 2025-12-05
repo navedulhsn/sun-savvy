@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
 from django.conf import settings
+from django.db import IntegrityError
 from ..forms import UserRegistrationForm, ServiceProviderRegistrationForm, AuthorizedPersonRegistrationForm, LoginForm
 from ..models import UserProfile, ServiceProvider, AuthorizedPerson
 
@@ -21,25 +22,46 @@ def register_user(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            # Check if username or email already exists
+            username = form.cleaned_data.get('username')
+            email = form.cleaned_data.get('email')
             
-            # Create user profile
-            UserProfile.objects.create(
-                user=user,
-                phone=form.cleaned_data.get('phone', ''),
-                address=form.cleaned_data.get('address', '')
-            )
+            if User.objects.filter(username=username).exists():
+                messages.error(request, f'Username "{username}" is already taken. Please choose a different username.')
+                return render(request, 'solar/register_user.html', {'form': form})
             
-            # Generate verification token
-            token = get_random_string(length=32)
-            user.userprofile.verification_token = token
-            user.userprofile.save()
+            if User.objects.filter(email=email).exists():
+                messages.error(request, f'Email "{email}" is already registered. Please use a different email or try logging in.')
+                return render(request, 'solar/register_user.html', {'form': form})
             
-            # Send verification email (mock)
-            # send_mail(...)
-            
-            messages.success(request, 'Registration successful! Please login.')
-            return redirect('login')
+            try:
+                user = form.save()
+                
+                # Create user profile
+                UserProfile.objects.create(
+                    user=user,
+                    phone=form.cleaned_data.get('phone', ''),
+                    address=form.cleaned_data.get('address', '')
+                )
+                
+                # Generate verification token
+                token = get_random_string(length=32)
+                user.userprofile.verification_token = token
+                user.userprofile.save()
+                
+                # Send verification email (mock)
+                # send_mail(...)
+                
+                messages.success(request, 'Registration successful! Please login.')
+                return redirect('login')
+            except IntegrityError as e:
+                if 'username' in str(e):
+                    messages.error(request, f'Username "{username}" is already taken. Please choose a different username.')
+                elif 'email' in str(e):
+                    messages.error(request, f'Email "{email}" is already registered. Please use a different email.')
+                else:
+                    messages.error(request, 'An error occurred during registration. Please try again.')
+                return render(request, 'solar/register_user.html', {'form': form})
     else:
         form = UserRegistrationForm()
     
@@ -50,23 +72,44 @@ def register_service_provider(request):
     if request.method == 'POST':
         form = ServiceProviderRegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            # Check if username already exists
+            username = form.cleaned_data.get('username')
+            email = form.cleaned_data.get('email')
             
-            # Create service provider profile
-            ServiceProvider.objects.create(
-                user=user,
-                company_name=form.cleaned_data.get('company_name'),
-                phone=form.cleaned_data.get('phone'),
-                email=user.email,
-                address=form.cleaned_data.get('address'),
-                city=form.cleaned_data.get('city'),
-                state=form.cleaned_data.get('state'),
-                zip_code=form.cleaned_data.get('zip_code'),
-                services_offered=form.cleaned_data.get('services_offered')
-            )
+            if User.objects.filter(username=username).exists():
+                messages.error(request, f'Username "{username}" is already taken. Please choose a different username.')
+                return render(request, 'solar/register_service_provider.html', {'form': form})
             
-            messages.success(request, 'Registration successful! Your account is pending approval.')
-            return redirect('login')
+            if User.objects.filter(email=email).exists():
+                messages.error(request, f'Email "{email}" is already registered. Please use a different email or try logging in.')
+                return render(request, 'solar/register_service_provider.html', {'form': form})
+            
+            try:
+                user = form.save()
+                
+                # Create service provider profile
+                ServiceProvider.objects.create(
+                    user=user,
+                    company_name=form.cleaned_data.get('company_name'),
+                    phone=form.cleaned_data.get('phone'),
+                    email=user.email,
+                    address=form.cleaned_data.get('address'),
+                    city=form.cleaned_data.get('city'),
+                    state=form.cleaned_data.get('state'),
+                    zip_code=form.cleaned_data.get('zip_code'),
+                    services_offered=form.cleaned_data.get('services_offered')
+                )
+                
+                messages.success(request, 'Registration successful! Your account is pending approval.')
+                return redirect('login')
+            except IntegrityError as e:
+                if 'username' in str(e):
+                    messages.error(request, f'Username "{username}" is already taken. Please choose a different username.')
+                elif 'email' in str(e):
+                    messages.error(request, f'Email "{email}" is already registered. Please use a different email.')
+                else:
+                    messages.error(request, 'An error occurred during registration. Please try again.')
+                return render(request, 'solar/register_service_provider.html', {'form': form})
     else:
         form = ServiceProviderRegistrationForm()
     
@@ -77,19 +120,40 @@ def register_authorized_person(request):
     if request.method == 'POST':
         form = AuthorizedPersonRegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            # Check if username or email already exists
+            username = form.cleaned_data.get('username')
+            email = form.cleaned_data.get('email')
             
-            # Create authorized person profile
-            AuthorizedPerson.objects.create(
-                user=user,
-                full_name=form.cleaned_data.get('full_name'),
-                phone=form.cleaned_data.get('phone'),
-                email=user.email,
-                designation=form.cleaned_data.get('designation')
-            )
+            if User.objects.filter(username=username).exists():
+                messages.error(request, f'Username "{username}" is already taken. Please choose a different username.')
+                return render(request, 'solar/register_authorized_person.html', {'form': form})
             
-            messages.success(request, 'Registration successful! Please login.')
-            return redirect('login')
+            if User.objects.filter(email=email).exists():
+                messages.error(request, f'Email "{email}" is already registered. Please use a different email or try logging in.')
+                return render(request, 'solar/register_authorized_person.html', {'form': form})
+            
+            try:
+                user = form.save()
+                
+                # Create authorized person profile
+                AuthorizedPerson.objects.create(
+                    user=user,
+                    full_name=form.cleaned_data.get('full_name'),
+                    phone=form.cleaned_data.get('phone'),
+                    email=user.email,
+                    designation=form.cleaned_data.get('designation')
+                )
+                
+                messages.success(request, 'Registration successful! Please login.')
+                return redirect('login')
+            except IntegrityError as e:
+                if 'username' in str(e):
+                    messages.error(request, f'Username "{username}" is already taken. Please choose a different username.')
+                elif 'email' in str(e):
+                    messages.error(request, f'Email "{email}" is already registered. Please use a different email.')
+                else:
+                    messages.error(request, 'An error occurred during registration. Please try again.')
+                return render(request, 'solar/register_authorized_person.html', {'form': form})
     else:
         form = AuthorizedPersonRegistrationForm()
     

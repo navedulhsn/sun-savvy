@@ -32,6 +32,9 @@
                         <a class="nav-link" href="{% url 'fault_detection' %}">
                             <i class="bi bi-camera me-2"></i>Fault Detection
                         </a>
+                        <a class="nav-link" href="{% url 'fault_detection_history' %}">
+                            <i class="bi bi-shield-check me-2"></i>Fault History
+                        </a>
                         <a class="nav-link" href="{% url 'service_providers' %}">
                             <i class="bi bi-people me-2"></i>Find Providers
                         </a>
@@ -172,7 +175,7 @@
             <!-- Recent Activity -->
             <div class="row g-3">
                 <!-- Recent Estimations -->
-                <div class="col-lg-6">
+                <div class="col-lg-4">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-header bg-white border-0 py-3">
                             <div class="d-flex justify-content-between align-items-center">
@@ -187,7 +190,7 @@
                                 <div class="list-group-item px-4 py-3">
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div class="flex-grow-1">
-                                            <h6 class="mb-1">{{ estimation.address|truncatechars:40 }}</h6>
+                                            <h6 class="mb-1">{{ estimation.address|truncatechars:30 }}</h6>
                                             <div class="d-flex gap-2 mb-2">
                                                 <span class="badge bg-success bg-opacity-10 text-success">{{ estimation.panel_capacity_kw|floatformat:1 }} kW</span>
                                                 <span class="badge bg-primary bg-opacity-10 text-primary">{{ estimation.panels_needed }} panels</span>
@@ -213,8 +216,63 @@
                     </div>
                 </div>
 
+                <!-- Recent Fault Detections -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-0 py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="bi bi-shield-check me-2"></i>Recent Fault Checks</h5>
+                                <a href="{% url 'fault_detection_history' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            {% if fault_detections %}
+                            <div class="list-group list-group-flush">
+                                {% for detection in fault_detections %}
+                                <div class="list-group-item px-4 py-3">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">
+                                                {% if detection.fault_type %}
+                                                    {{ detection.fault_type|title }}
+                                                {% else %}
+                                                    Detection Result
+                                                {% endif %}
+                                            </h6>
+                                            <div class="d-flex gap-2 mb-2">
+                                                {% if detection.fault_type == 'Clean' %}
+                                                    <span class="badge bg-success">Clean</span>
+                                                {% elif detection.fault_type == 'Error' %}
+                                                    <span class="badge bg-danger">Error</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning text-dark">{{ detection.fault_type|title }}</span>
+                                                {% endif %}
+                                                {% if detection.confidence_score %}
+                                                    <span class="badge bg-info">{{ detection.confidence_score|floatformat:0 }}%</span>
+                                                {% endif %}
+                                            </div>
+                                            <small class="text-muted"><i class="bi bi-calendar me-1"></i>{{ detection.created_at|date:"M d, Y" }}</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <a href="{% url 'fault_detection_history' %}" class="btn btn-sm btn-outline-primary">View</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5">
+                                <i class="bi bi-shield-check text-muted" style="font-size: 3rem;"></i>
+                                <p class="text-muted mt-3 mb-2">No fault checks yet</p>
+                                <a href="{% url 'fault_detection' %}" class="btn btn-sm btn-primary">Check Your Panels</a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Active Service Requests -->
-                <div class="col-lg-6">
+                <div class="col-lg-4">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-header bg-white border-0 py-3">
                             <div class="d-flex justify-content-between align-items-center">
@@ -229,7 +287,7 @@
                                 <div class="list-group-item px-4 py-3">
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div>
-                                            <h6 class="mb-1">{{ request.service_provider.company_name }}</h6>
+                                            <h6 class="mb-1">{{ request.service_provider.company_name|truncatechars:25 }}</h6>
                                             <p class="mb-2 small">{{ request.service_type }}</p>
                                             <small class="text-muted"><i class="bi bi-calendar me-1"></i>{{ request.requested_date|date:"M d, Y" }}</small>
                                         </div>

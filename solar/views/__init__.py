@@ -7,7 +7,8 @@ from .auth_views import (
 from .customer_views import (
     dashboard, solar_estimation, estimation_history, 
     generate_estimation_report, my_requests, service_providers, 
-    service_provider_detail
+    service_provider_detail, estimation_location, estimation_energy,
+    estimation_roof, estimation_savings
 )
 from .provider_views import (
     provider_dashboard,
@@ -15,6 +16,10 @@ from .provider_views import (
     provider_requests,
     provider_request_detail,
     provider_services,
+    provider_panels,
+    provider_panel_add,
+    provider_panel_edit,
+    provider_panel_delete,
 )
 from .admin_views import (
     admin_dashboard, admin_users, admin_user_detail, admin_user_delete,

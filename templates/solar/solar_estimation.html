@@ -341,8 +341,38 @@
 {% block content %}
 <div class="estimation-container">
     <div class="page-header">
-        <h1>Solar Energy Estimation</h1>
-        <p>Calculate your solar potential in four simple steps</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+                <h1>Solar Energy Estimation</h1>
+                <p>Calculate your solar potential in four simple steps</p>
+            </div>
+            {% if location_result or energy_result or roof_result or savings_roi_result %}
+            <div style="display: flex; gap: 12px;">
+                <form method="post" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" name="action" value="clear_all" class="btn btn-outline-danger" style="padding: 10px 20px; border-radius: 8px;">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Clear All
+                    </button>
+                </form>
+                <a href="{% url 'solar_estimation' %}?new=1" class="btn btn-primary" style="padding: 10px 20px; border-radius: 8px; text-decoration: none;">
+                    <i class="bi bi-plus-circle me-2"></i>Start New
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Progress Indicator -->
+        {% if completed_modules > 0 %}
+        <div style="background: #f5f5f7; border-radius: 12px; padding: 20px; margin-top: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <span style="font-size: 15px; font-weight: 500; color: #1d1d1f;">Progress</span>
+                <span style="font-size: 15px; font-weight: 600; color: #1d1d1f;">{{ completed_modules }} of 4 modules completed</span>
+            </div>
+            <div style="background: #d2d2d7; border-radius: 8px; height: 8px; overflow: hidden;">
+                <div style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: {{ progress_percentage }}%; transition: width 0.3s ease; border-radius: 8px;"></div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 
     <!-- Module 1: Location Based Estimation -->
@@ -464,6 +494,7 @@
             </div>
 
             {% if not energy_result %}
+            {% if appliances %}
             <form method="post">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="calculate_energy">
@@ -502,6 +533,13 @@
                     Calculate Energy Consumption
                 </button>
             </form>
+            {% else %}
+            <div style="text-align: center; padding: 60px 20px; background: #f5f5f7; border-radius: 12px;">
+                <i class="bi bi-exclamation-triangle" style="font-size: 48px; color: #ff9500; margin-bottom: 16px;"></i>
+                <h5 style="color: #1d1d1f; margin-bottom: 8px;">No Appliances Available</h5>
+                <p style="color: #86868b; margin-bottom: 0;">Please contact the administrator to populate appliances in the system.</p>
+            </div>
+            {% endif %}
             {% else %}
             <div class="result-box">
                 <div class="result-title">
@@ -651,6 +689,32 @@
                 {% endif %}
             </div>
 
+            <!-- Disclaimer - Always visible until results are cleared -->
+            {% if location_result and energy_result and roof_result %}
+            <div id="estimation-disclaimer" class="alert alert-info alert-permanent" style="margin-bottom: 20px; padding: 15px; border-radius: 8px; background-color: #e7f3ff; border-left: 4px solid #0066cc; position: relative;">
+                <div style="display: flex; align-items: start;">
+                    <i class="bi bi-info-circle" style="font-size: 20px; color: #0066cc; margin-right: 10px; margin-top: 2px;"></i>
+                    <div>
+                        <strong style="color: #0066cc;">Disclaimer - Rough Estimation:</strong>
+                        <p style="margin: 8px 0 0 0; color: #333; font-size: 14px;">
+                            This is a <strong>rough estimation</strong> based on average Pakistani market rates (2024-2025). 
+                            Actual costs may vary based on:
+                        </p>
+                        <ul style="margin: 8px 0 0 20px; color: #555; font-size: 13px;">
+                            <li>Panel brand and quality (Standard, Medium, Large, Premium)</li>
+                            <li>Installation complexity and location</li>
+                            <li>Inverter type and capacity</li>
+                            <li>Wiring and mounting requirements</li>
+                            <li>Local market conditions and provider pricing</li>
+                        </ul>
+                        <p style="margin: 8px 0 0 0; color: #333; font-size: 14px;">
+                            <strong>Please consult with certified solar installers for accurate quotations.</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
             {% if not savings_roi_result %}
                 {% if location_result and energy_result and roof_result %}
                 <form method="post">
@@ -666,11 +730,13 @@
                             </option>
                             {% endfor %}
                         </select>
+                        <small class="text-muted">Panel prices are based on Pakistani market rates (Standard: ~168 PKR/W, Medium: ~168 PKR/W, Large: ~168 PKR/W, Premium: ~187 PKR/W). Prices are rough estimates and may vary.</small>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Electricity Rate (PKR/kWh) <small style="color: #86868b;">(Optional)</small></label>
                         <input type="number" name="electricity_rate" class="form-control" step="0.01" placeholder="Default: 33.6 PKR/kWh">
+                        <small class="text-muted">Average electricity rate in Pakistan (varies by region and consumer type)</small>
                     </div>
 
                     <button type="submit" class="btn btn-primary">
@@ -715,12 +781,30 @@
                         <div class="result-value" style="color: #34c759;">{{ savings_roi_result.roi_percentage|floatformat:1 }}%</div>
                     </div>
                 </div>
-                <form method="post" style="margin-top: 20px;">
-                    {% csrf_token %}
-                    <button type="submit" name="action" value="clear_savings_roi" class="btn-secondary">
-                        <i class="bi bi-x-circle me-2"></i>Clear Results
-                    </button>
-                </form>
+                <div style="display: flex; gap: 12px; margin-top: 20px; align-items: center;">
+                    {% if estimation_saved %}
+                    <div style="padding: 12px 24px; background: #d4edda; color: #155724; border-radius: 8px; display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Saved to Dashboard</span>
+                    </div>
+                    {% else %}
+                    <form method="post" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" name="action" value="save_estimation" class="btn btn-success" style="padding: 12px 24px; border-radius: 8px;">
+                            <i class="bi bi-save me-2"></i>Save to Dashboard
+                        </button>
+                    </form>
+                    {% endif %}
+                    <form method="post" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" name="action" value="clear_savings_roi" class="btn-secondary">
+                            <i class="bi bi-x-circle me-2"></i>Clear Results
+                        </button>
+                    </form>
+                    <a href="{% url 'dashboard' %}" class="btn btn-primary" style="padding: 12px 24px; border-radius: 8px; text-decoration: none;">
+                        <i class="bi bi-speedometer2 me-2"></i>View Dashboard
+                    </a>
+                </div>
             </div>
             {% endif %}
         </div>
@@ -730,10 +814,10 @@
     {% if all_complete %}
     <div class="download-section">
         <h2>Your Complete Solar Report</h2>
-        <p>Download a comprehensive PDF report with all your estimation details</p>
-        <a href="{% url 'generate_estimation_report' %}" class="btn-download">
+        <p>Download a comprehensive CSV report with all your estimation details</p>
+        <a href="{% url 'generate_estimation_report' %}" class="btn-download" download>
             <i class="bi bi-download" style="font-size: 20px;"></i>
-            Download Full Report
+            Download Full Report (CSV)
         </a>
     </div>
     {% endif %}
@@ -821,6 +905,26 @@ document.addEventListener('DOMContentLoaded', function() {
             script.defer = true;
             document.head.appendChild(script);
         }
+    }
+    
+    // Prevent disclaimer from auto-hiding
+    const disclaimer = document.getElementById('estimation-disclaimer');
+    if (disclaimer) {
+        // Remove any auto-dismiss classes
+        disclaimer.classList.remove('alert-dismissible', 'fade', 'show');
+        // Prevent Bootstrap from auto-hiding
+        disclaimer.style.display = 'block';
+        disclaimer.style.opacity = '1';
+        disclaimer.style.visibility = 'visible';
+        
+        // Stop any setTimeout that might be hiding it
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            if (alert.id === 'estimation-disclaimer') {
+                // Ensure it stays visible
+                alert.style.display = 'block !important';
+            }
+        });
     }
 });
 </script>

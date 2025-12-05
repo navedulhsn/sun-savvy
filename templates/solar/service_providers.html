@@ -4,31 +4,186 @@
 
 {% block content %}
 <div class="container my-5">
+    <!-- Header Section -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="fw-bold mb-0"><i class="bi bi-building text-primary"></i> Service Providers</h1>
+        <div>
+            <h1 class="fw-bold mb-1"><i class="bi bi-building text-primary me-2"></i>Service Providers</h1>
+            <p class="text-muted mb-0">Find verified solar panel installation and service providers</p>
+        </div>
     </div>
 
+    <!-- Search and Filter Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" action="{% url 'service_providers' %}" class="row g-3">
+                <!-- Search Bar -->
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">Search Providers</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" name="search" class="form-control" placeholder="Company name, city, or service..." value="{{ search_query }}">
+                    </div>
+                </div>
+                
+                <!-- City Filter -->
+                <div class="col-md-3">
+                    <label class="form-label small text-muted">Filter by City</label>
+                    <select name="city" class="form-select">
+                        <option value="">All Cities</option>
+                        {% for city in all_cities %}
+                        <option value="{{ city }}" {% if city_filter == city %}selected{% endif %}>{{ city }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Service Filter -->
+                <div class="col-md-3">
+                    <label class="form-label small text-muted">Filter by Service</label>
+                    <select name="service" class="form-select">
+                        <option value="">All Services</option>
+                        <option value="Installation" {% if service_filter == 'Installation' %}selected{% endif %}>Installation</option>
+                        <option value="Repair" {% if service_filter == 'Repair' %}selected{% endif %}>Repair</option>
+                        <option value="Maintenance" {% if service_filter == 'Maintenance' %}selected{% endif %}>Maintenance</option>
+                    </select>
+                </div>
+                
+                <!-- Sort Options -->
+                <div class="col-md-2">
+                    <label class="form-label small text-muted">Sort By</label>
+                    <select name="sort" class="form-select">
+                        <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Rating</option>
+                        <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest</option>
+                        <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name</option>
+                    </select>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-funnel me-1"></i>Apply Filters
+                    </button>
+                    <a href="{% url 'service_providers' %}" class="btn btn-outline-secondary ms-2">
+                        <i class="bi bi-x-circle me-1"></i>Clear
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Count -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <p class="text-muted mb-0">
+            <i class="bi bi-info-circle me-1"></i>Showing <strong>{{ total_count }}</strong> provider{{ total_count|pluralize }}
+            {% if search_query or city_filter or service_filter %}
+            <span class="badge bg-secondary ms-2">Filtered</span>
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Providers Grid -->
     {% if providers %}
     <div class="row g-4">
         {% for provider in providers %}
         <div class="col-md-6 col-lg-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-body d-flex flex-column">
-                    <div class="d-flex align-items-start justify-content-between">
-                        <div>
-                            <h5 class="card-title mb-1">{{ provider.company_name }}</h5>
-                            <small class="text-muted">{{ provider.city }}, {{ provider.state }}</small>
+            <div class="card shadow-sm h-100 border-0 provider-card" style="transition: transform 0.2s, box-shadow 0.2s;">
+                <!-- Card Header with Logo -->
+                <div class="card-header bg-white border-bottom-0 pb-0">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            {% if provider.company_logo %}
+                            <img src="{{ provider.company_logo.url }}" alt="{{ provider.company_name }}" 
+                                 class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                            {% else %}
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" 
+                                 style="width: 60px; height: 60px;">
+                                <i class="bi bi-building fs-4"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <h5 class="card-title mb-0 fw-bold">{{ provider.company_name }}</h5>
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle me-1"></i>Verified
+                                </span>
+                            </div>
                         </div>
-                        {% if provider.rating %}
-                        <span class="badge bg-success">{{ provider.rating }}★</span>
+                    </div>
+                </div>
+                
+                <!-- Card Body -->
+                <div class="card-body d-flex flex-column">
+                    <!-- Location -->
+                    <div class="mb-2">
+                        <i class="bi bi-geo-alt-fill text-danger me-2"></i>
+                        <span class="text-muted">{{ provider.city }}, {{ provider.state }}</span>
+                    </div>
+                    
+                    <!-- Rating -->
+                    {% if provider.rating %}
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="text-warning me-2">
+                                {% if provider.rating_int >= 1 %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+                                {% if provider.rating_int >= 2 %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+                                {% if provider.rating_int >= 3 %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+                                {% if provider.rating_int >= 4 %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+                                {% if provider.rating_int >= 5 %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+                            </div>
+                            <span class="fw-semibold ms-1">{{ provider.rating|floatformat:1 }}</span>
+                            <small class="text-muted ms-1">(Rating)</small>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="mb-3">
+                        <span class="text-muted small"><i class="bi bi-star me-1"></i>No rating yet</span>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Services Offered -->
+                    <div class="mb-3">
+                        <p class="small text-muted mb-1"><i class="bi bi-tools me-1"></i>Services:</p>
+                        <div class="d-flex flex-wrap gap-1">
+                            {% if provider.services_list %}
+                                {% for service in provider.services_list %}
+                                <span class="badge bg-primary-subtle text-primary border">{{ service }}</span>
+                                {% endfor %}
+                            {% else %}
+                            <span class="text-muted small">Not specified</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Years in Business -->
+                    {% if provider.years_in_business %}
+                    <div class="mb-3">
+                        <i class="bi bi-calendar-check text-info me-2"></i>
+                        <span class="text-muted small">{{ provider.years_in_business }} years in business</span>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Contact Info -->
+                    <div class="mb-3 small">
+                        {% if provider.phone %}
+                        <div class="mb-1">
+                            <i class="bi bi-telephone text-success me-2"></i>
+                            <a href="tel:{{ provider.phone }}" class="text-decoration-none">{{ provider.phone }}</a>
+                        </div>
+                        {% endif %}
+                        {% if provider.email %}
+                        <div>
+                            <i class="bi bi-envelope text-primary me-2"></i>
+                            <a href="mailto:{{ provider.email }}" class="text-decoration-none">{{ provider.email }}</a>
+                        </div>
                         {% endif %}
                     </div>
-                    <div class="mt-3">
-                        <p class="mb-1 text-muted">Services</p>
-                        <div class="small">{{ provider.services_offered|default:"Not specified" }}</div>
-                    </div>
+                    
+                    <!-- Action Buttons -->
                     <div class="mt-auto pt-3 d-flex gap-2">
-                        <a href="{% url 'service_provider_detail' provider.id %}" class="btn btn-primary w-100">View Details</a>
+                        <a href="{% url 'service_provider_detail' provider.id %}" class="btn btn-primary flex-fill">
+                            <i class="bi bi-eye me-1"></i>View Profile
+                        </a>
+                        <a href="{% url 'service_provider_detail' provider.id %}#contact" class="btn btn-outline-success">
+                            <i class="bi bi-chat-dots"></i>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -36,12 +191,44 @@
         {% endfor %}
     </div>
     {% else %}
+    <!-- Empty State -->
     <div class="card shadow-sm">
         <div class="card-body text-center py-5">
-            <div class="display-6 text-muted mb-3"><i class="bi bi-inboxes"></i></div>
-            <p class="text-muted">No verified providers available right now.</p>
+            <div class="display-1 text-muted mb-3">
+                <i class="bi bi-inboxes"></i>
+            </div>
+            <h4 class="text-muted mb-2">No Providers Found</h4>
+            <p class="text-muted">
+                {% if search_query or city_filter or service_filter %}
+                Try adjusting your search or filter criteria.
+                {% else %}
+                No verified providers available right now. Please check back later.
+                {% endif %}
+            </p>
+            {% if search_query or city_filter or service_filter %}
+            <a href="{% url 'service_providers' %}" class="btn btn-primary mt-3">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>Clear Filters
+            </a>
+            {% endif %}
         </div>
     </div>
     {% endif %}
 </div>
+
+<!-- Custom CSS for hover effects -->
+<style>
+    .provider-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .card-header {
+        padding: 1.25rem 1.25rem 0.5rem 1.25rem;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.35em 0.65em;
+    }
+</style>
 {% endblock %}

@@ -12,9 +12,29 @@ class ServiceRequest(models.Model):
         ('cancelled', 'Cancelled'),
     ]
     
+    # Request category - what user wants
+    REQUEST_CATEGORY_CHOICES = [
+        ('purchase', 'Purchase Panels'),
+        ('installation', 'Installation Service'),
+        ('repair', 'Repair Service'),
+        ('maintenance', 'Maintenance Service'),
+    ]
+    
+    # Panel type choices - same 4 types as ProviderPanel
+    PANEL_TYPE_CHOICES = [
+        ('premium', 'Premium Solar Panel'),
+        ('large', 'Large Solar Panel'),
+        ('medium', 'Medium Solar Panel'),
+        ('standard', 'Standard Solar Panel'),
+    ]
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='service_requests')
     service_provider = models.ForeignKey(ServiceProvider, on_delete=models.CASCADE, related_name='requests')
-    service_type = models.CharField(max_length=100)  # Installation, Repair, Maintenance
+    request_category = models.CharField(max_length=20, choices=REQUEST_CATEGORY_CHOICES, blank=True, null=True, help_text="Main request type")
+    service_type = models.CharField(max_length=100, blank=True)  # Legacy field, kept for compatibility
+    preferred_panel_type = models.CharField(max_length=20, choices=PANEL_TYPE_CHOICES, blank=True, null=True, help_text="Panel type for installation/maintenance")
+    selected_panel = models.ForeignKey('ProviderPanel', on_delete=models.SET_NULL, null=True, blank=True, help_text="Selected panel for purchase")
+    quantity = models.IntegerField(default=1, help_text="Quantity for purchase")
     description = models.TextField()
     address = models.TextField()
     phone = models.CharField(max_length=20)

@@ -57,27 +57,45 @@
                         {% for p in provider_panels %}
                         <div class="col-md-6">
                             <div class="border rounded p-3 h-100">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div class="fw-semibold">{{ p.name }}</div>
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <div class="fw-semibold">{{ p.name }}</div>
+                                        {% if p.model_no %}
+                                        <div class="small text-muted">Model: {{ p.model_no }}</div>
+                                        {% endif %}
+                                    </div>
                                     <span class="badge bg-secondary">{{ p.power_watts }}W</span>
                                 </div>
-                                <div class="small text-muted">
-                                    {% if p.efficiency %}Efficiency {{ p.efficiency|floatformat:2 }}, {% endif %}Stock {{ p.stock }}
+                                <div class="small text-muted mb-2">
+                                    {% if p.efficiency %}
+                                    <span class="badge bg-info">Efficiency: {{ p.efficiency|floatformat:0 }}%</span>
+                                    {% endif %}
+                                    {% if p.length and p.width %}
+                                    <span class="badge bg-secondary"><i class="bi bi-rulers"></i> {{ p.length|floatformat:2 }}m × {{ p.width|floatformat:2 }}m</span>
+                                    {% endif %}
                                 </div>
                                 {% if p.image %}
-                                <div class="mt-2">
+                                <div class="mt-2 mb-2">
                                     <img src="{{ p.image.url }}" alt="{{ p.name }}" class="img-fluid rounded">
                                 </div>
                                 {% endif %}
                                 <div class="mt-2">
-                                    <div class="small">Price</div>
+                                    <div class="small">Panel Price</div>
                                     <div class="fw-bold text-success">PKR {{ p.price_pkr|floatformat:0 }}</div>
+                                    {% if p.installation_price %}
+                                    <div class="small mt-1">Installation Price</div>
+                                    <div class="fw-bold">PKR {{ p.installation_price|floatformat:0 }}</div>
+                                    <div class="small mt-1 text-primary">Total: <strong>PKR {{ p.price_pkr|add:p.installation_price|floatformat:0 }}</strong></div>
+                                    {% endif %}
                                 </div>
-                                {% if p.warranty_years %}
-                                <div class="mt-1 small text-muted">Warranty {{ p.warranty_years }} years</div>
-                                {% endif %}
+                                <div class="mt-2 small text-muted">
+                                    <div>Stock Available: <strong>{{ p.stock }}</strong> units</div>
+                                    {% if p.warranty_years %}
+                                    <div>Warranty: <strong>{{ p.warranty_years }}</strong> years</div>
+                                    {% endif %}
+                                </div>
                                 {% if p.description %}
-                                <div class="mt-2 small">{{ p.description }}</div>
+                                <div class="mt-2 small">{{ p.description|truncatewords:20 }}</div>
                                 {% endif %}
                             </div>
                         </div>
@@ -119,47 +137,123 @@
                 </div>
                 <div class="card-body">
                     {% if user.is_authenticated %}
-                    <form method="post">
+                    <form method="post" id="serviceRequestForm">
                         {% csrf_token %}
-                        <div class="mb-3">
-                            <label class="form-label">Service Type</label>
-                            <select name="service_type" class="form-select" required>
-                                {% if services_list %}
-                                {% for s in services_list %}
-                                <option value="{{ s }}">{{ s }}</option>
-                                {% endfor %}
-                                {% endif %}
-                                {% if provider_panels %}
-                                <optgroup label="Provider Products">
+                        
+                        <!-- Section 1: What do you need? -->
+                        <div class="mb-4">
+                            <h6 class="mb-3"><i class="bi bi-question-circle me-2"></i>What do you need?</h6>
+                            <div class="mb-3">
+                                <label class="form-label fw-medium">Request Type *</label>
+                                <select name="request_category" class="form-select" id="id_request_category" required>
+                                    <option value="">-- Select --</option>
+                                    <option value="purchase">I want to purchase panels</option>
+                                    <option value="installation">I need installation service</option>
+                                    <option value="repair">I need repair service</option>
+                                    <option value="maintenance">I need maintenance service</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Section 2: Purchase Details (shown only for purchase) -->
+                        <div class="mb-4" id="purchase_section" style="display: none;">
+                            <h6 class="mb-3"><i class="bi bi-cart me-2"></i>Panel Selection</h6>
+                            <div class="mb-3">
+                                <label class="form-label">Select Panel *</label>
+                                <select name="selected_panel" class="form-select" id="id_selected_panel">
+                                    <option value="">-- Select Panel --</option>
                                     {% for p in provider_panels %}
-                                    <option value="Purchase - {{ p.name }} ({{ p.power_watts }}W)">Purchase - {{ p.name }} ({{ p.power_watts }}W)</option>
-                                    <option value="Installation - {{ p.name }} ({{ p.power_watts }}W)">Installation - {{ p.name }} ({{ p.power_watts }}W)</option>
+                                    <option value="{{ p.id }}">{{ p.name }} ({{ p.power_watts }}W) - PKR {{ p.price_pkr|floatformat:0 }}</option>
                                     {% endfor %}
-                                </optgroup>
+                                </select>
+                                {% if not provider_panels %}
+                                <small class="text-muted">No panels available from this provider</small>
                                 {% endif %}
-                                {% if panel_catalog %}
-                                <optgroup label="Panel Installation">
-                                    {% for p in panel_catalog %}
-                                    <option value="Installation - {{ p.name }} ({{ p.power_watts }}W)">Installation - {{ p.name }} ({{ p.power_watts }}W)</option>
-                                    {% endfor %}
-                                </optgroup>
-                                {% endif %}
-                            </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Quantity *</label>
+                                <input type="number" name="quantity" class="form-control" id="id_quantity" min="1" value="1" required>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            <textarea name="description" class="form-control" rows="3" placeholder="Describe your requirement"></textarea>
+                        
+                        <!-- Section 3: Service Details (shown for installation/repair/maintenance) -->
+                        <div class="mb-4" id="service_section" style="display: none;">
+                            <h6 class="mb-3"><i class="bi bi-tools me-2"></i>Service Details</h6>
+                            <div class="mb-3">
+                                <label class="form-label">Panel Type <small class="text-muted">(Optional)</small></label>
+                                <select name="preferred_panel_type" class="form-select" id="id_panel_type">
+                                    <option value="">Select Panel Type (Optional)</option>
+                                    <option value="premium">Premium Solar Panel</option>
+                                    <option value="large">Large Solar Panel</option>
+                                    <option value="medium">Medium Solar Panel</option>
+                                    <option value="standard">Standard Solar Panel</option>
+                                </select>
+                                <small class="text-muted">Select if you know your panel type</small>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Address</label>
-                            <textarea name="address" class="form-control" rows="2" required></textarea>
+                        
+                        <!-- Section 4: Contact Information -->
+                        <div class="mb-4">
+                            <h6 class="mb-3"><i class="bi bi-person-lines-fill me-2"></i>Contact Information</h6>
+                            <div class="mb-3">
+                                <label class="form-label">Description *</label>
+                                <textarea name="description" class="form-control" rows="3" placeholder="Describe your requirement" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Address *</label>
+                                <textarea name="address" class="form-control" rows="2" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Phone *</label>
+                                <input type="text" name="phone" class="form-control" required>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Phone</label>
-                            <input type="text" name="phone" class="form-control" required>
-                        </div>
+                        
                         <button type="submit" class="btn btn-primary w-100">Submit Request</button>
                     </form>
+                    
+                    <!-- JavaScript for conditional form fields -->
+                    <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const requestCategory = document.getElementById('id_request_category');
+                        const purchaseSection = document.getElementById('purchase_section');
+                        const serviceSection = document.getElementById('service_section');
+                        const selectedPanel = document.getElementById('id_selected_panel');
+                        const quantity = document.getElementById('id_quantity');
+                        const panelType = document.getElementById('id_panel_type');
+                        
+                        function toggleSections() {
+                            const category = requestCategory.value;
+                            
+                            // Hide both sections first
+                            purchaseSection.style.display = 'none';
+                            serviceSection.style.display = 'none';
+                            
+                            // Show relevant section based on selection
+                            if (category === 'purchase') {
+                                purchaseSection.style.display = 'block';
+                                selectedPanel.required = true;
+                                quantity.required = true;
+                                panelType.required = false;
+                            } else if (category === 'installation' || category === 'repair' || category === 'maintenance') {
+                                serviceSection.style.display = 'block';
+                                selectedPanel.required = false;
+                                quantity.required = false;
+                                panelType.required = false;
+                            } else {
+                                selectedPanel.required = false;
+                                quantity.required = false;
+                                panelType.required = false;
+                            }
+                        }
+                        
+                        // Listen for changes
+                        requestCategory.addEventListener('change', toggleSections);
+                        
+                        // Initial call to set correct state
+                        toggleSections();
+                    });
+                    </script>
                     {% else %}
                     <div class="text-center">
                         <p class="text-muted">Please log in to book a service.</p>

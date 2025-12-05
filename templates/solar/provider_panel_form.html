@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if panel %}Edit Panel{% else %}Add Panel{% endif %} - Provider Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">{% if panel %}Edit Panel{% else %}Add New Panel{% endif %}</h2>
+                    <p class="text-muted mb-0">{% if panel %}Update panel information{% else %}Add a new solar panel to your catalog{% endif %}</p>
+                </div>
+                <a href="{% url 'provider_panels' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Catalog
+                </a>
+            </div>
+
+            <!-- Form -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row g-3">
+                            <!-- Basic Information -->
+                            <div class="col-12">
+                                <h5 class="mb-3"><i class="bi bi-info-circle me-2"></i>Basic Information</h5>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Panel Type *</label>
+                                {{ form.panel_type }}
+                                <small class="text-muted">Select one of the 4 predefined panel types</small>
+                                {% if form.panel_type.errors %}
+                                <div class="text-danger small">{{ form.panel_type.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Custom Name (Optional)</label>
+                                {{ form.name }}
+                                <small class="text-muted">Leave blank to use panel type name</small>
+                                {% if form.name.errors %}
+                                <div class="text-danger small">{{ form.name.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Model Number</label>
+                                {{ form.model_no }}
+                                <small class="text-muted">e.g., SP-500W-MONO-2024</small>
+                                {% if form.model_no.errors %}
+                                <div class="text-danger small">{{ form.model_no.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Power (Watts) *</label>
+                                {{ form.power_watts }}
+                                {% if form.power_watts.errors %}
+                                <div class="text-danger small">{{ form.power_watts.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Efficiency</label>
+                                {{ form.efficiency }}
+                                <small class="text-muted">Panel efficiency as a decimal (e.g., 0.20 for 20%)</small>
+                                {% if form.efficiency.errors %}
+                                <div class="text-danger small">{{ form.efficiency.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Warranty (Years)</label>
+                                {{ form.warranty_years }}
+                                {% if form.warranty_years.errors %}
+                                <div class="text-danger small">{{ form.warranty_years.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Length (meters)</label>
+                                {{ form.length }}
+                                <small class="text-muted">Panel length in meters</small>
+                                {% if form.length.errors %}
+                                <div class="text-danger small">{{ form.length.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Width (meters)</label>
+                                {{ form.width }}
+                                <small class="text-muted">Panel width in meters</small>
+                                {% if form.width.errors %}
+                                <div class="text-danger small">{{ form.width.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Pricing & Stock -->
+                            <div class="col-12 mt-4">
+                                <h5 class="mb-3"><i class="bi bi-currency-exchange me-2"></i>Pricing & Inventory</h5>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Price (PKR) *</label>
+                                {{ form.price_pkr }}
+                                <small class="text-muted">Price per panel in Pakistani Rupees</small>
+                                {% if form.price_pkr.errors %}
+                                <div class="text-danger small">{{ form.price_pkr.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Installation Price (PKR)</label>
+                                {{ form.installation_price }}
+                                <small class="text-muted">Installation cost per panel in PKR</small>
+                                {% if form.installation_price.errors %}
+                                <div class="text-danger small">{{ form.installation_price.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Stock Quantity *</label>
+                                {{ form.stock }}
+                                <small class="text-muted">Available units in inventory</small>
+                                {% if form.stock.errors %}
+                                <div class="text-danger small">{{ form.stock.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Image & Description -->
+                            <div class="col-12 mt-4">
+                                <h5 class="mb-3"><i class="bi bi-image me-2"></i>Image & Description</h5>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Panel Image</label>
+                                {{ form.image }}
+                                {% if panel and panel.image %}
+                                <div class="mt-2">
+                                    <img src="{{ panel.image.url }}" alt="Current image" class="img-thumbnail" style="max-width: 200px;">
+                                    <p class="small text-muted mt-1">Current image</p>
+                                </div>
+                                {% endif %}
+                                {% if form.image.errors %}
+                                <div class="text-danger small">{{ form.image.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Status</label>
+                                <div class="form-check form-switch mt-2">
+                                    {{ form.is_active }}
+                                    <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                        Active (visible to customers)
+                                    </label>
+                                </div>
+                                {% if form.is_active.errors %}
+                                <div class="text-danger small">{{ form.is_active.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-12">
+                                <label class="form-label fw-medium">Description</label>
+                                {{ form.description }}
+                                <small class="text-muted">Describe the panel features, specifications, and benefits</small>
+                                {% if form.description.errors %}
+                                <div class="text-danger small">{{ form.description.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex gap-2 justify-content-end mt-4">
+                            <a href="{% url 'provider_panels' %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>{% if panel %}Update Panel{% else %}Add Panel{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.contrib import messages
-from ..models import ServiceProvider, AuthorizedPerson, ServiceRequest
+from ..models import ServiceProvider, AuthorizedPerson, ServiceRequest, UserProfile
 from django.db.models import Q
 from .auth_views import is_authorized_person
 
@@ -11,16 +11,26 @@ from .auth_views import is_authorized_person
 def admin_dashboard(request):
     """Admin dashboard for authorized persons"""
     # Stats
-    total_users = User.objects.count()
+    total_users = UserProfile.objects.count()
     total_providers = ServiceProvider.objects.count()
     pending_providers = ServiceProvider.objects.filter(is_verified=False).count()
     total_requests = ServiceRequest.objects.count()
+    pending_requests = ServiceRequest.objects.filter(status='pending').count()
+    
+    # Recent activity
+    recent_users = UserProfile.objects.select_related('user').all().order_by('-created_at')[:5]
+    recent_providers = ServiceProvider.objects.all().order_by('-created_at')[:5]
+    recent_requests = ServiceRequest.objects.select_related('user', 'service_provider').all().order_by('-requested_date')[:5]
     
     context = {
         'total_users': total_users,
         'total_providers': total_providers,
         'pending_providers': pending_providers,
         'total_requests': total_requests,
+        'pending_requests': pending_requests,
+        'recent_users': recent_users,
+        'recent_providers': recent_providers,
+        'recent_requests': recent_requests,
     }
     return render(request, 'solar/admin_dashboard.html', context)
 
@@ -28,8 +38,22 @@ def admin_dashboard(request):
 @user_passes_test(lambda u: u.is_superuser or u.is_staff or is_authorized_person(u))
 def admin_users(request):
     """Admin: List all users"""
-    users = User.objects.all().order_by('-date_joined')
-    return render(request, 'solar/admin_users.html', {'users': users})
+    search_query = request.GET.get('search', '').strip()
+    user_profiles = UserProfile.objects.select_related('user').all().order_by('-created_at')
+    
+    if search_query:
+        user_profiles = user_profiles.filter(
+            Q(user__username__icontains=search_query) |
+            Q(user__email__icontains=search_query) |
+            Q(user__first_name__icontains=search_query) |
+            Q(user__last_name__icontains=search_query) |
+            Q(phone__icontains=search_query)
+        )
+    
+    return render(request, 'solar/admin_users.html', {
+        'users': user_profiles,
+        'search_query': search_query,
+    })
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser or u.is_staff or is_authorized_person(u))

@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
-from .models import ServiceProvider, AuthorizedPerson, SolarEstimation, ServiceRequest, FaultDetection
+from .models import ServiceProvider, AuthorizedPerson, SolarEstimation, ServiceRequest, FaultDetection, ProviderPanel
 
 
 class LoginForm(AuthenticationForm):
@@ -17,6 +17,18 @@ class UserRegistrationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2']
+    
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError('This username is already taken. Please choose a different one.')
+        return username
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError('This email is already registered. Please use a different email or try logging in.')
+        return email
     
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -43,6 +55,18 @@ class ServiceProviderRegistrationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2']
+    
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError('This username is already taken. Please choose a different one.')
+        return username
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError('This email is already registered. Please use a different email or try logging in.')
+        return email
 
 
 class SolarEstimationForm(forms.ModelForm):
@@ -113,27 +137,73 @@ class SolarEstimationForm(forms.ModelForm):
 
 
 class ServiceRequestForm(forms.ModelForm):
-    service_type = forms.ChoiceField(
+    # Main request category - what user wants
+    request_category = forms.ChoiceField(
         choices=[
-            ('Installation', 'Installation'),
-            ('Repair', 'Repair'),
-            ('Maintenance', 'Maintenance'),
+            ('purchase', 'I want to purchase panels'),
+            ('installation', 'I need installation service'),
+            ('repair', 'I need repair service'),
+            ('maintenance', 'I need maintenance service'),
         ],
-        required=True
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'id_request_category'})
+    )
+    # Panel type for installation/maintenance
+    preferred_panel_type = forms.ChoiceField(
+        choices=[
+            ('', 'Select Panel Type (Optional)'),
+            ('premium', 'Premium Solar Panel'),
+            ('large', 'Large Solar Panel'),
+            ('medium', 'Medium Solar Panel'),
+            ('standard', 'Standard Solar Panel'),
+        ],
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'id_panel_type'})
+    )
+    # Panel selection for purchase
+    selected_panel = forms.ModelChoiceField(
+        queryset=None,  # Will be set in __init__
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'id_selected_panel'}),
+        help_text="Select panel to purchase"
+    )
+    quantity = forms.IntegerField(
+        required=False,
+        min_value=1,
+        initial=1,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'id': 'id_quantity', 'min': '1'}),
+        help_text="Quantity"
     )
     description = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 4}),
-        required=True
+        widget=forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+        required=True,
+        help_text="Describe your requirement"
     )
     address = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 3}),
+        widget=forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
         required=True
     )
-    phone = forms.CharField(max_length=20, required=True)
+    phone = forms.CharField(
+        max_length=20, 
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
     
     class Meta:
         model = ServiceRequest
-        fields = ['service_type', 'description', 'address', 'phone']
+        fields = ['request_category', 'preferred_panel_type', 'selected_panel', 'quantity', 'description', 'address', 'phone']
+    
+    def __init__(self, *args, **kwargs):
+        # Get provider panels for purchase selection
+        provider = kwargs.pop('provider', None)
+        super().__init__(*args, **kwargs)
+        
+        # Set panel queryset if provider provided
+        if provider:
+            from .models import ProviderPanel
+            self.fields['selected_panel'].queryset = ProviderPanel.objects.filter(provider=provider, is_active=True)
+        else:
+            self.fields['selected_panel'].queryset = ProviderPanel.objects.none()
 
 
 class AuthorizedPersonRegistrationForm(UserCreationForm):
@@ -145,6 +215,18 @@ class AuthorizedPersonRegistrationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2']
+    
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError('This username is already taken. Please choose a different one.')
+        return username
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError('This email is already registered. Please use a different email or try logging in.')
+        return email
 
 
 class FaultDetectionForm(forms.ModelForm):
@@ -190,3 +272,46 @@ class ServiceProviderProfileForm(forms.ModelForm):
             'price_per_watt': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'installation_cost_per_watt': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
         }
+
+
+class ProviderPanelForm(forms.ModelForm):
+    """Form for adding/editing provider panels with predefined panel type selection"""
+    
+    class Meta:
+        model = ProviderPanel
+        fields = [
+            'panel_type', 'name', 'model_no', 'power_watts', 'efficiency', 'length', 'width',
+            'price_pkr', 'installation_price', 'stock', 'warranty_years', 
+            'image', 'description', 'is_active'
+        ]
+        widgets = {
+            'panel_type': forms.Select(attrs={'class': 'form-control'}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Custom name (optional)'}),
+            'model_no': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., SP-500W-MONO-2024'}),
+            'power_watts': forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'placeholder': 'Power in watts'}),
+            'efficiency': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'max': '1', 'placeholder': 'e.g., 0.20 for 20%'}),
+            'length': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'placeholder': 'Length in meters'}),
+            'width': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'placeholder': 'Width in meters'}),
+            'price_pkr': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'placeholder': 'Price in PKR'}),
+            'installation_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'placeholder': 'Installation price in PKR'}),
+            'stock': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'placeholder': 'Available stock'}),
+            'warranty_years': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'placeholder': 'Warranty period in years'}),
+            'image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Panel description, features, specifications...'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Panel type is required for new panels
+        self.fields['panel_type'].required = True
+        self.fields['panel_type'].help_text = "Select one of the 4 predefined panel types"
+        # Name is optional (will use panel type name if not provided)
+        self.fields['name'].required = False
+        self.fields['efficiency'].required = False
+        self.fields['image'].required = False
+        self.fields['description'].required = False
+        self.fields['model_no'].required = False
+        self.fields['length'].required = False
+        self.fields['width'].required = False
+        self.fields['installation_price'].required = False

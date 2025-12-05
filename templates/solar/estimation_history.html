@@ -62,25 +62,25 @@
             <div class="row g-3 mt-3">
                 <div class="col-6 col-md-3">
                     <div class="text-center p-2 bg-light rounded">
-                        <div class="fw-bold text-primary">{{ estimation.panel_capacity_kw|floatformat:1 }} kW</div>
+                        <div class="fw-bold text-primary">{{ estimation.safe_panel_capacity|default:"N/A" }}</div>
                         <small class="text-muted">System Capacity</small>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
                     <div class="text-center p-2 bg-light rounded">
-                        <div class="fw-bold text-success">{{ estimation.panels_needed }}</div>
+                        <div class="fw-bold text-success">{{ estimation.panels_needed|default:"N/A" }}</div>
                         <small class="text-muted">Panels</small>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
                     <div class="text-center p-2 bg-light rounded">
-                        <div class="fw-bold text-info">PKR {{ estimation.estimated_cost|floatformat:0 }}</div>
+                        <div class="fw-bold text-info">{{ estimation.safe_estimated_cost|default:"N/A" }}</div>
                         <small class="text-muted">Estimated Cost</small>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
                     <div class="text-center p-2 bg-light rounded">
-                        <div class="fw-bold text-warning">PKR {{ estimation.annual_savings|floatformat:0 }}</div>
+                        <div class="fw-bold text-warning">{{ estimation.safe_annual_savings|default:"N/A" }}</div>
                         <small class="text-muted">Annual Savings</small>
                     </div>
                 </div>
@@ -89,15 +89,15 @@
             <div class="row g-3 mt-2">
                 <div class="col-6 col-md-3">
                     <small class="text-muted">ROI</small>
-                    <div class="fw-semibold">{{ estimation.roi_percentage|floatformat:1 }}%</div>
+                    <div class="fw-semibold">{{ estimation.safe_roi|default:"N/A" }}</div>
                 </div>
                 <div class="col-6 col-md-3">
                     <small class="text-muted">Payback Period</small>
-                    <div class="fw-semibold">{{ estimation.payback_period_years|floatformat:1 }} years</div>
+                    <div class="fw-semibold">{{ estimation.safe_payback|default:"N/A" }}</div>
                 </div>
                 <div class="col-12 col-md-6">
                     <small class="text-muted">Address</small>
-                    <div class="fw-semibold">{{ estimation.address }}</div>
+                    <div class="fw-semibold">{{ estimation.address|default:"Not provided" }}</div>
                 </div>
             </div>
         </div>

@@ -4,8 +4,8 @@ from django.contrib import messages
 from django.db.models import Q, Count
 from django.utils import timezone
 from datetime import timedelta
-from ..models import ServiceProvider, ServiceRequest
-from ..forms import ServiceProviderProfileForm
+from ..models import ServiceProvider, ServiceRequest, ProviderPanel
+from ..forms import ServiceProviderProfileForm, ProviderPanelForm
 
 @login_required
 def provider_dashboard(request):
@@ -175,3 +175,107 @@ def provider_services(request):
     }
     
     return render(request, 'solar/provider_services.html', context)
+
+
+@login_required
+def provider_panels(request):
+    """List all panels for the provider"""
+    try:
+        provider = request.user.serviceprovider
+    except ServiceProvider.DoesNotExist:
+        messages.error(request, 'Service provider profile not found.')
+        return redirect('home')
+    
+    panels = ProviderPanel.objects.filter(provider=provider).order_by('-created_at')
+    
+    context = {
+        'provider': provider,
+        'panels': panels,
+    }
+    
+    return render(request, 'solar/provider_panels.html', context)
+
+
+@login_required
+def provider_panel_add(request):
+    """Add a new panel to the catalog - panel type is required"""
+    try:
+        provider = request.user.serviceprovider
+    except ServiceProvider.DoesNotExist:
+        messages.error(request, 'Service provider profile not found.')
+        return redirect('home')
+    
+    if request.method == 'POST':
+        form = ProviderPanelForm(request.POST, request.FILES)
+        if form.is_valid():
+            panel = form.save(commit=False)
+            panel.provider = provider
+            # Use panel type name if custom name not provided
+            if not panel.name:
+                panel.name = panel.get_panel_type_display()
+            panel.save()
+            messages.success(request, f'Panel "{panel.name}" added successfully!')
+            return redirect('provider_panels')
+    else:
+        form = ProviderPanelForm()
+    
+    context = {
+        'provider': provider,
+        'form': form,
+    }
+    
+    return render(request, 'solar/provider_panel_form.html', context)
+
+
+@login_required
+def provider_panel_edit(request, panel_id):
+    """Edit an existing panel"""
+    try:
+        provider = request.user.serviceprovider
+    except ServiceProvider.DoesNotExist:
+        messages.error(request, 'Service provider profile not found.')
+        return redirect('home')
+    
+    panel = get_object_or_404(ProviderPanel, id=panel_id, provider=provider)
+    
+    if request.method == 'POST':
+        form = ProviderPanelForm(request.POST, request.FILES, instance=panel)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Panel "{panel.name}" updated successfully!')
+            return redirect('provider_panels')
+    else:
+        form = ProviderPanelForm(instance=panel)
+    
+    context = {
+        'provider': provider,
+        'form': form,
+        'panel': panel,
+    }
+    
+    return render(request, 'solar/provider_panel_form.html', context)
+
+
+@login_required
+def provider_panel_delete(request, panel_id):
+    """Delete a panel"""
+    try:
+        provider = request.user.serviceprovider
+    except ServiceProvider.DoesNotExist:
+        messages.error(request, 'Service provider profile not found.')
+        return redirect('home')
+    
+    panel = get_object_or_404(ProviderPanel, id=panel_id, provider=provider)
+    
+    if request.method == 'POST':
+        panel_name = panel.name
+        panel.delete()
+        messages.success(request, f'Panel "{panel_name}" deleted successfully!')
+        return redirect('provider_panels')
+    
+    context = {
+        'provider': provider,
+        'panel': panel,
+    }
+    
+    return render(request, 'solar/provider_panel_delete.html', context)

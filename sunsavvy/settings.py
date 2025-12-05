@@ -146,6 +146,7 @@ OPENWEATHER_API_KEY = config('OPENWEATHER_API_KEY', default='')
 SOLCAST_API_KEY = config('SOLCAST_API_KEY', default='')
 GOOGLE_MAPS_API_KEY = config('GOOGLE_MAPS_API_KEY', default='')
 OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
+GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
 
 # Email Configuration
 # For Gmail SMTP, you need to:

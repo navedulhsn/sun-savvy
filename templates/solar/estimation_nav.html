@@ -1,0 +1,94 @@
+<!-- Mini Navigation Bar for Estimation Pages -->
+<div class="estimation-mini-nav" style="position: fixed; top: 76px; left: 0; right: 0; background: #ffffff; border-bottom: 1px solid #e5e5e7; z-index: 1020; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+    <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+        <div class="row align-items-center" style="min-height: 60px;">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <!-- Navigation Links -->
+                    <div class="d-flex gap-3" style="flex: 1;">
+                        <a href="{% url 'estimation_location' %}" 
+                           class="estimation-nav-link {% if current_module == 1 %}active{% endif %}" 
+                           style="text-decoration: none; padding: 12px 16px; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
+                            {% if location_result %}
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            {% else %}
+                            <span style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #86868b; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">1</span>
+                            {% endif %}
+                            <span style="font-weight: 500; color: {% if current_module == 1 %}#0071e3{% elif location_result %}#34c759{% else %}#86868b{% endif %};">
+                                Location
+                            </span>
+                        </a>
+                        
+                        <a href="{% url 'estimation_energy' %}" 
+                           class="estimation-nav-link {% if current_module == 2 %}active{% endif %}" 
+                           style="text-decoration: none; padding: 12px 16px; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
+                            {% if energy_result %}
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            {% else %}
+                            <span style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #86868b; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">2</span>
+                            {% endif %}
+                            <span style="font-weight: 500; color: {% if current_module == 2 %}#0071e3{% elif energy_result %}#34c759{% else %}#86868b{% endif %};">
+                                Energy
+                            </span>
+                        </a>
+                        
+                        <a href="{% url 'estimation_roof' %}" 
+                           class="estimation-nav-link {% if current_module == 3 %}active{% endif %}" 
+                           style="text-decoration: none; padding: 12px 16px; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
+                            {% if roof_result %}
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            {% else %}
+                            <span style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #86868b; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">3</span>
+                            {% endif %}
+                            <span style="font-weight: 500; color: {% if current_module == 3 %}#0071e3{% elif roof_result %}#34c759{% else %}#86868b{% endif %};">
+                                Roof
+                            </span>
+                        </a>
+                        
+                        <a href="{% url 'estimation_savings' %}" 
+                           class="estimation-nav-link {% if current_module == 4 %}active{% endif %}" 
+                           style="text-decoration: none; padding: 12px 16px; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
+                            {% if savings_roi_result %}
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            {% else %}
+                            <span style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #86868b; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">4</span>
+                            {% endif %}
+                            <span style="font-weight: 500; color: {% if current_module == 4 %}#0071e3{% elif savings_roi_result %}#34c759{% else %}#86868b{% endif %};">
+                                Savings & ROI
+                            </span>
+                        </a>
+                    </div>
+                    
+                    <!-- Progress Indicator -->
+                    <div class="d-flex align-items-center gap-3">
+                        <div style="text-align: right;">
+                            <div style="font-size: 13px; color: #86868b; font-weight: 500;">Progress</div>
+                            <div style="font-size: 15px; font-weight: 600; color: #1d1d1f;">{{ completed_modules }}/4</div>
+                        </div>
+                        <div style="width: 60px; height: 60px; position: relative;">
+                            <svg width="60" height="60" style="transform: rotate(-90deg);">
+                                <circle cx="30" cy="30" r="26" stroke="#e5e5e7" stroke-width="4" fill="none"></circle>
+                                <circle cx="30" cy="30" r="26" stroke="#0071e3" stroke-width="4" fill="none" 
+                                        stroke-dasharray="{{ progress_percentage|floatformat:0 }} 100" 
+                                        stroke-linecap="round"></circle>
+                            </svg>
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 12px; font-weight: 600; color: #1d1d1f;">
+                                {{ progress_percentage|floatformat:0 }}%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.estimation-nav-link:hover {
+    background-color: #f5f5f7;
+}
+.estimation-nav-link.active {
+    background-color: #e7f3ff;
+}
+</style>
+

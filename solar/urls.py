@@ -22,10 +22,18 @@ urlpatterns = [
     path('provider/requests/', views.provider_requests, name='provider_requests'),
     path('provider/requests/<int:request_id>/', views.provider_request_detail, name='provider_request_detail'),
     path('provider/services/', views.provider_services, name='provider_services'),
+    path('provider/panels/', views.provider_panels, name='provider_panels'),
+    path('provider/panels/add/', views.provider_panel_add, name='provider_panel_add'),
+    path('provider/panels/<int:panel_id>/edit/', views.provider_panel_edit, name='provider_panel_edit'),
+    path('provider/panels/<int:panel_id>/delete/', views.provider_panel_delete, name='provider_panel_delete'),
     # Note: Admin dashboard URLs are now in sunsavvy/urls.py to avoid conflicts with Django admin
     
     # Solar Estimation
-    path('estimation/', views.solar_estimation, name='solar_estimation'),
+    path('estimation/', views.solar_estimation, name='solar_estimation'),  # Redirects to first module
+    path('estimation/location/', views.estimation_location, name='estimation_location'),
+    path('estimation/energy/', views.estimation_energy, name='estimation_energy'),
+    path('estimation/roof/', views.estimation_roof, name='estimation_roof'),
+    path('estimation/savings/', views.estimation_savings, name='estimation_savings'),
     path('estimation/history/', views.estimation_history, name='estimation_history'),
     path('estimation/generate-report/', views.generate_estimation_report, name='generate_estimation_report'),
     

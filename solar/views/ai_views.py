@@ -8,27 +8,66 @@ import json
 
 def fault_detection(request):
     """AI fault detection - Available to all users"""
+    from django.contrib import messages
+    
     if request.method == 'POST':
         if 'image' in request.FILES:
             image = request.FILES['image']
             
-            # Save temporary record
-            detection = FaultDetection.objects.create(
-                user=request.user if request.user.is_authenticated else None,
-                image=image
-            )
-            
-            # Run AI detection
-            result = detect_fault_ai(detection.image.path)
-            
-            # Update record
-            detection.fault_type = result['fault_type']
-            detection.confidence_score = result['confidence_score']
-            detection.description = result['description']
-            detection.detection_result = result
-            detection.save()
-            
-            return render(request, 'solar/fault_detection_result.html', {'detection': detection})
+            try:
+                # Save temporary record
+                detection = FaultDetection.objects.create(
+                    user=request.user if request.user.is_authenticated else None,
+                    image=image
+                )
+                
+                # Run AI detection
+                result = detect_fault_ai(detection.image.path)
+                
+                # Check if detection failed
+                if result.get('fault_type') == 'Error':
+                    messages.error(request, f"Detection error: {result.get('description', 'Unknown error')}")
+                    # Still show the result page with error info
+                    context = {
+                        'detection': detection,
+                        'fault_type_display': 'Error',
+                        'confidence_percentage': 0.0,
+                    }
+                    return render(request, 'solar/fault_detection_result.html', context)
+                
+                # Convert confidence to percentage (0-1 to 0-100)
+                confidence_percentage = float(result['confidence_score']) * 100
+                
+                # Update record
+                detection.fault_type = result['fault_type']
+                detection.confidence_score = confidence_percentage  # Store as percentage
+                detection.description = result['description']
+                detection.detection_result = result
+                detection.save()
+                
+                # Add formatted fault type name for display
+                fault_type_display = result['fault_type'].replace('-', ' ').title()
+                if fault_type_display == 'Physical Damage':
+                    fault_type_display = 'Physical Damage'
+                elif fault_type_display == 'Snow Covered':
+                    fault_type_display = 'Snow Covered'
+                
+                context = {
+                    'detection': detection,
+                    'fault_type_display': fault_type_display,
+                    'confidence_percentage': round(confidence_percentage, 1),
+                }
+                
+                return render(request, 'solar/fault_detection_result.html', context)
+                
+            except Exception as e:
+                import traceback
+                error_trace = traceback.format_exc()
+                print(f"Fault detection error: {error_trace}")
+                messages.error(request, f"An error occurred during detection: {str(e)}")
+                return render(request, 'solar/fault_detection.html', {'error': str(e)})
+        else:
+            messages.error(request, "Please select an image file.")
             
     return render(request, 'solar/fault_detection.html')
 

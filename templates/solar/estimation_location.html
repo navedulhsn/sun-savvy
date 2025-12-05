@@ -1,0 +1,573 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Step 1: Location - Solar Estimation{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Apple-inspired Design */
+    body {
+        background: linear-gradient(180deg, #f5f5f7 0%, #ffffff 100%);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .estimation-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 60px 20px;
+        padding-top: 160px; /* Account for main nav + mini nav */
+    }
+
+    .module-card {
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 40px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .module-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .module-title {
+        font-size: 32px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: #1d1d1f;
+        margin: 0;
+    }
+
+    .module-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        font-size: 20px;
+        font-weight: 600;
+        margin-right: 16px;
+    }
+
+    .status-badge {
+        background: #34c759;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 500;
+        color: #1d1d1f;
+        margin-bottom: 8px;
+        font-size: 15px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #d2d2d7;
+        border-radius: 10px;
+        font-size: 15px;
+        transition: all 0.2s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #0071e3;
+        box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 500;
+        font-size: 15px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-primary {
+        background: #0071e3;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #0051d5;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+    }
+
+    .btn-secondary {
+        background: #f5f5f7;
+        color: #1d1d1f;
+    }
+
+    .btn-secondary:hover {
+        background: #e5e5e7;
+    }
+
+    .btn-outline-danger {
+        background: transparent;
+        color: #dc3545;
+        border: 2px solid #dc3545;
+    }
+
+    .btn-outline-danger:hover {
+        background: #dc3545;
+        color: white;
+    }
+
+    .location-method-toggle {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .location-method-btn {
+        flex: 1;
+        padding: 12px 20px;
+        border: 2px solid #d2d2d7;
+        background: white;
+        border-radius: 10px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .location-method-btn.active {
+        border-color: #0071e3;
+        background: #e7f3ff;
+        color: #0071e3;
+    }
+
+    .location-option {
+        margin-bottom: 24px;
+    }
+
+    .location-option.hidden {
+        display: none;
+    }
+
+    #map-container {
+        width: 100%;
+        height: 400px;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .result-box {
+        background: #f5f5f7;
+        border-radius: 12px;
+        padding: 32px;
+    }
+
+    .result-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 24px;
+        font-weight: 600;
+        color: #1d1d1f;
+        margin-bottom: 24px;
+    }
+
+    .result-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .result-item {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+    }
+
+    .result-label {
+        font-size: 13px;
+        color: #86868b;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+
+    .result-value {
+        font-size: 24px;
+        font-weight: 600;
+        color: #1d1d1f;
+    }
+
+    .navigation-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 32px;
+        gap: 16px;
+    }
+
+    .step-indicator {
+        text-align: center;
+        margin-bottom: 32px;
+        color: #86868b;
+        font-size: 15px;
+    }
+
+    .input-tabs {
+        margin-top: 24px;
+    }
+
+    .tab-buttons {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+        border-bottom: 2px solid #e5e5e7;
+    }
+
+    .tab-btn {
+        padding: 12px 24px;
+        border: none;
+        background: transparent;
+        color: #86868b;
+        font-weight: 500;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+        font-size: 15px;
+    }
+
+    .tab-btn:hover {
+        color: #0071e3;
+    }
+
+    .tab-btn.active {
+        color: #0071e3;
+        border-bottom-color: #0071e3;
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    .info-box {
+        font-size: 14px;
+        color: #1d1d1f;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Mini Navigation Bar -->
+{% include 'solar/estimation_nav.html' %}
+
+<div class="estimation-container">
+    <div class="step-indicator">
+        Step {{ current_module }} of {{ total_modules }}
+    </div>
+
+    <div class="module-card">
+        <div class="module-header">
+            <h2 class="module-title">
+                <span class="module-number">1</span>
+                Location Based Estimation
+            </h2>
+            {% if location_result %}
+            <span class="status-badge">✓ Completed</span>
+            {% endif %}
+        </div>
+
+        {% if not location_result %}
+        <!-- Two-Tab Input System -->
+        <div class="input-tabs">
+            <div class="tab-buttons">
+                <button type="button" class="tab-btn active" onclick="switchTab('address'); return false;">
+                    <i class="bi bi-house-door me-2"></i>Enter Location
+                </button>
+                <button type="button" class="tab-btn" onclick="switchTab('coordinates'); return false;">
+                    <i class="bi bi-geo-alt me-2"></i>Enter Coordinates
+                </button>
+            </div>
+
+            <!-- Location Tab -->
+            <form method="post" id="address-form" class="tab-content active">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="calculate_location">
+                <input type="hidden" name="input_method" value="address">
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">City <span style="color: #dc3545;">*</span></label>
+                        <input type="text" name="city" class="form-control" placeholder="e.g., Karachi" required>
+                        <small class="form-text text-muted">Enter your city name</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">State/Province <span style="color: #dc3545;">*</span></label>
+                        <input type="text" name="state" class="form-control" placeholder="e.g., Sindh" required>
+                        <small class="form-text text-muted">Enter your state or province</small>
+                    </div>
+                </div>
+
+                <div class="form-group mt-3">
+                    <label class="form-label">Street Address <small class="text-muted">(Optional)</small></label>
+                    <input type="text" name="address" class="form-control" placeholder="e.g., Street No. 10, Main Road">
+                    <small class="form-text text-muted">Optional: Enter your complete street address for more accurate location</small>
+                </div>
+
+                <div class="info-box" style="background: #e7f3ff; padding: 16px; border-radius: 10px; margin: 20px 0;">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Location-based:</strong> Enter your city and state (required). Street address is optional. We'll find your location using free geocoding.
+                </div>
+
+                <div class="navigation-buttons">
+                    <form method="post" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" name="action" value="clear_all" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to clear all estimation data?');">
+                            <i class="bi bi-trash me-2"></i>Clear All
+                        </button>
+                    </form>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-calculator me-2"></i>Calculate Solar Potential
+                    </button>
+                </div>
+            </form>
+
+            <!-- Coordinates Tab -->
+            <form method="post" id="coordinates-form" class="tab-content">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="calculate_location">
+                <input type="hidden" name="input_method" value="coordinates">
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Latitude</label>
+                        <input type="number" name="latitude" id="latitude-input" class="form-control" step="0.000001" placeholder="e.g., 24.8607" required>
+                        <small class="form-text text-muted">Range: 23.5 to 37.0 (Pakistan)</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Longitude</label>
+                        <input type="number" name="longitude" id="longitude-input" class="form-control" step="0.000001" placeholder="e.g., 67.0011" required>
+                        <small class="form-text text-muted">Range: 60.8 to 77.8 (Pakistan)</small>
+                    </div>
+                </div>
+
+                <div class="form-group mt-3">
+                    <label class="form-label">Address (Optional)</label>
+                    <input type="text" name="address" class="form-control" placeholder="Optional: Enter address for reference">
+                </div>
+
+                <div class="info-box" style="background: #fff3cd; padding: 16px; border-radius: 10px; margin: 20px 0;">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Coordinates-based:</strong> Enter latitude and longitude directly. We'll reverse geocode to get your address.
+                </div>
+
+                <!-- Map Preview for Coordinates (using free Leaflet.js) -->
+                <div id="map-preview-container" style="margin: 20px 0; display: none;">
+                    <label class="form-label">Location Preview</label>
+                    <div id="map-preview" style="width: 100%; height: 300px; border-radius: 10px; overflow: hidden; border: 1px solid #d2d2d7;"></div>
+                </div>
+
+                <div class="navigation-buttons">
+                    <form method="post" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" name="action" value="clear_all" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to clear all estimation data?');">
+                            <i class="bi bi-trash me-2"></i>Clear All
+                        </button>
+                    </form>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-calculator me-2"></i>Calculate Solar Potential
+                    </button>
+                </div>
+            </form>
+        </div>
+        {% else %}
+        <div class="result-box">
+            <div class="result-title">
+                <i class="bi bi-check-circle-fill text-success"></i>
+                Location Analysis Complete
+            </div>
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label">Address</div>
+                    <div class="result-value" style="font-size: 16px;">{{ location_result.address|default:"Not specified" }}</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">City, State</div>
+                    <div class="result-value" style="font-size: 16px;">{{ location_result.city|default:"" }}{% if location_result.city and location_result.state %}, {% endif %}{{ location_result.state|default:"Not specified" }}</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Solar Irradiance</div>
+                    <div class="result-value">
+                        {{ location_result.irradiance|floatformat:2 }} <small style="font-size: 14px;">{{ location_result.irradiance_unit }}</small>
+                        {% if location_result.irradiance_source %}
+                        <br><small style="font-size: 12px; color: #86868b;">Source: {{ location_result.irradiance_source }}</small>
+                        {% endif %}
+                        {% if location_result.irradiance_confidence %}
+                        <br><small style="font-size: 12px; color: #86868b;">Confidence: {{ location_result.irradiance_confidence|title }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if location_result.gemini_analysis %}
+                <div class="result-item" style="grid-column: 1 / -1;">
+                    <div class="result-label">AI Location Analysis</div>
+                    <div class="result-value" style="font-size: 14px; font-weight: normal;">
+                        {% if location_result.gemini_analysis.location_summary %}
+                        <p><strong>Summary:</strong> {{ location_result.gemini_analysis.location_summary }}</p>
+                        {% endif %}
+                        {% if location_result.gemini_analysis.climate_zone %}
+                        <p><strong>Climate Zone:</strong> {{ location_result.gemini_analysis.climate_zone }}</p>
+                        {% endif %}
+                        {% if location_result.gemini_analysis.recommendations %}
+                        <p><strong>Recommendations:</strong> {{ location_result.gemini_analysis.recommendations }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                <div class="result-item">
+                    <div class="result-label">Coordinates</div>
+                    <div class="result-value" style="font-size: 14px;">{{ location_result.latitude|floatformat:4 }}, {{ location_result.longitude|floatformat:4 }}</div>
+                </div>
+            </div>
+            <div class="navigation-buttons">
+                <div style="display: flex; gap: 12px;">
+                    <form method="post" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" name="action" value="clear_location" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-2"></i>Clear Results
+                        </button>
+                    </form>
+                    <form method="post" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" name="action" value="clear_all" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to clear all estimation data? This will reset everything to the beginning.');">
+                            <i class="bi bi-trash me-2"></i>Clear All
+                        </button>
+                    </form>
+                </div>
+                <a href="{% url 'estimation_energy' %}" class="btn btn-primary" style="text-decoration: none;">
+                    Next: Energy Consumption <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+let previewMap;
+let previewMarker;
+
+function switchTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.tab-btn').forEach((btn, index) => {
+        btn.classList.remove('active');
+        if ((tabName === 'address' && index === 0) || (tabName === 'coordinates' && index === 1)) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    if (tabName === 'address') {
+        document.getElementById('address-form').classList.add('active');
+    } else {
+        document.getElementById('coordinates-form').classList.add('active');
+    }
+}
+
+// Coordinate validation and map preview using Leaflet.js (FREE)
+document.addEventListener('DOMContentLoaded', function() {
+    const latInput = document.getElementById('latitude-input');
+    const lngInput = document.getElementById('longitude-input');
+    
+    if (latInput && lngInput) {
+        function updateMapPreview() {
+            const lat = parseFloat(latInput.value);
+            const lng = parseFloat(lngInput.value);
+            
+            if (isNaN(lat) || isNaN(lng)) return;
+            
+            // Validate Pakistan boundaries
+            if (lat < 23.5 || lat > 37.0 || lng < 60.8 || lng > 77.8) {
+                return; // Don't show map if outside Pakistan
+            }
+            
+            const previewContainer = document.getElementById('map-preview-container');
+            const mapDiv = document.getElementById('map-preview');
+            
+            if (previewContainer && mapDiv && typeof L !== 'undefined') {
+                previewContainer.style.display = 'block';
+                
+                if (!previewMap) {
+                    // Initialize Leaflet map
+                    previewMap = L.map('map-preview').setView([lat, lng], 13);
+                    
+                    // Add OpenStreetMap tiles (FREE)
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors',
+                        maxZoom: 19
+                    }).addTo(previewMap);
+                    
+                    // Add marker
+                    previewMarker = L.marker([lat, lng]).addTo(previewMap);
+                } else {
+                    // Update map center and marker position
+                    previewMap.setView([lat, lng], 13);
+                    previewMarker.setLatLng([lat, lng]);
+                }
+            }
+        }
+        
+        // Debounce input to avoid too many map updates
+        let updateTimeout;
+        function debouncedUpdate() {
+            clearTimeout(updateTimeout);
+            updateTimeout = setTimeout(updateMapPreview, 500);
+        }
+        
+        latInput.addEventListener('input', debouncedUpdate);
+        lngInput.addEventListener('input', debouncedUpdate);
+    }
+});
+</script>
+
+<!-- Leaflet.js - Free OpenStreetMap Maps (No API key required) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+{% endblock %}
+
+

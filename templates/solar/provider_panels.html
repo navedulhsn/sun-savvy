@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Panel Catalog - Provider Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 px-0">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        {% if provider.company_logo %}
+                        <img src="{{ provider.company_logo.url }}" alt="{{ provider.company_name }}"
+                            class="rounded-circle mb-2" style="width: 80px; height: 80px; object-fit: cover;">
+                        {% else %}
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-2"
+                            style="width: 80px; height: 80px;">
+                            <i class="bi bi-building fs-2"></i>
+                        </div>
+                        {% endif %}
+                        <h6 class="mb-0">{{ provider.company_name }}</h6>
+                        <small class="text-muted">{{ provider.city }}, {{ provider.state }}</small>
+                    </div>
+
+                    <nav class="nav flex-column">
+                        <a class="nav-link" href="{% url 'provider_dashboard' %}">
+                            <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                        </a>
+                        <a class="nav-link" href="{% url 'provider_requests' %}">
+                            <i class="bi bi-inbox me-2"></i>Requests
+                        </a>
+                        <a class="nav-link" href="{% url 'provider_profile_edit' %}">
+                            <i class="bi bi-person-gear me-2"></i>Profile
+                        </a>
+                        <a class="nav-link" href="{% url 'provider_services' %}">
+                            <i class="bi bi-tools me-2"></i>Services
+                        </a>
+                        <a class="nav-link active" href="{% url 'provider_panels' %}">
+                            <i class="bi bi-grid me-2"></i>Panel Catalog
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-0">Panel Catalog</h2>
+                    <p class="text-muted mb-0">Manage your solar panel inventory</p>
+                </div>
+                <a href="{% url 'provider_panel_add' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i>Add New Panel
+                </a>
+            </div>
+
+            <!-- Panels Grid -->
+            {% if panels %}
+            <div class="row g-4">
+                {% for panel in panels %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        {% if panel.image %}
+                        <img src="{{ panel.image.url }}" class="card-img-top" alt="{{ panel.name }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                        </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h5 class="card-title mb-0">{{ panel.name }}</h5>
+                                    <span class="badge bg-primary mb-1">{{ panel.get_panel_type_display }}</span>
+                                    {% if panel.model_no %}
+                                    <small class="text-muted d-block">Model: {{ panel.model_no }}</small>
+                                    {% endif %}
+                                </div>
+                                {% if not panel.is_active %}
+                                <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </div>
+                            <div class="mb-2">
+                                <span class="badge bg-primary">{{ panel.power_watts }}W</span>
+                                {% if panel.efficiency %}
+                                <span class="badge bg-info">{{ panel.efficiency|floatformat:0 }}% Efficiency</span>
+                                {% endif %}
+                            </div>
+                            {% if panel.length and panel.width %}
+                            <div class="small text-muted mb-2">
+                                <i class="bi bi-rulers"></i> {{ panel.length|floatformat:2 }}m × {{ panel.width|floatformat:2 }}m
+                            </div>
+                            {% endif %}
+                            <div class="mb-2">
+                                <div><strong class="text-success">PKR {{ panel.price_pkr|floatformat:0 }}</strong></div>
+                                {% if panel.installation_price %}
+                                <div class="small text-muted">Installation: <strong>PKR {{ panel.installation_price|floatformat:0 }}</strong></div>
+                                {% endif %}
+                            </div>
+                            <div class="small text-muted mb-2">
+                                <div>Stock: <strong>{{ panel.stock }}</strong> units</div>
+                                {% if panel.warranty_years %}
+                                <div>Warranty: <strong>{{ panel.warranty_years }}</strong> years</div>
+                                {% endif %}
+                            </div>
+                            {% if panel.description %}
+                            <p class="card-text small text-muted">{{ panel.description|truncatewords:15 }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer bg-white border-0">
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'provider_panel_edit' panel.id %}" class="btn btn-sm btn-outline-primary flex-fill">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                <a href="{% url 'provider_panel_delete' panel.id %}" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-grid text-muted" style="font-size: 4rem;"></i>
+                    <h5 class="mt-3 text-muted">No panels in your catalog</h5>
+                    <p class="text-muted">Start by adding your first solar panel to attract more customers!</p>
+                    <a href="{% url 'provider_panel_add' %}" class="btn btn-primary mt-3">
+                        <i class="bi bi-plus-circle me-1"></i>Add Your First Panel
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
